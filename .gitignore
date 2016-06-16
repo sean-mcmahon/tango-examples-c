@@ -8,3 +8,8 @@
 *.dex
 *gen/
 *local.properties
+~/Dropbox/Uni/Code/tango-examples-c/cpp_rgb_depth_sync_example/.gradle/*
+/cpp_rgb_depth_sync_example/app/build/*
+/cpp_rgb_depth_sync_example/app/src/main/libs/*
+/cpp_rgb_depth_sync_example/app/src/main/obj/*
+/cpp_rgb_depth_sync_example/build/*
