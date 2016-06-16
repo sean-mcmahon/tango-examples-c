@@ -154,6 +154,17 @@ bool SynchronizationApplication::TangoConnectTexture() {
   return err == TANGO_SUCCESS;
 }
 
+bool SynchronizationApplication::tangoConnectFisheyeTexture() {
+    // The Tango service allows you to connect an OpenGL texture directly to its
+    // RGB and fisheye cameras. This is the most efficient way of receiving
+    // images from the service because it avoids copies. You get access to the
+    // graphic buffer directly. As we're interested in rendering the color image
+    // in our render loop, we'll be polling for the color image as needed.
+    TangoErrorType err = TangoService_connectTextureId(
+            TANGO_CAMERA_COLOR, color_image_.GetTextureId(), this, nullptr);
+    return err == TANGO_SUCCESS;
+}
+
 bool SynchronizationApplication::TangoConnectCallbacks() {
   // We're interested in only one callback for this application. We need to be
   // notified when we receive depth information in order to support measuring

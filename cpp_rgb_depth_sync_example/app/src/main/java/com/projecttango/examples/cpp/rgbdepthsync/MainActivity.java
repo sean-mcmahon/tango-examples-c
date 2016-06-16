@@ -184,6 +184,7 @@ public class MainActivity extends Activity {
       Log.e(TAG, "Failed to connect texture.");
       finish();
     }
+  }
 
   public void FisheyeSurfaceCreated() {
     // This gets called in GLsurfaceRenderer.java an instance of this class is passed there and this method is called
