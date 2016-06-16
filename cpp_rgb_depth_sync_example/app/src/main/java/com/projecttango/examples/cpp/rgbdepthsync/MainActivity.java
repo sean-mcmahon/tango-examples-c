@@ -178,8 +178,16 @@ public class MainActivity extends Activity {
   }
 
   public void surfaceCreated() {
+    // This gets called in GLsurfaceRenderer.java an instance of this class is passed there and this method is called
     JNIInterface.initializeGLContent();
     if (!JNIInterface.tangoConnectTexture()) {
+      Log.e(TAG, "Failed to connect texture.");
+      finish();
+    }
+
+  public void FisheyeSurfaceCreated() {
+    // This gets called in GLsurfaceRenderer.java an instance of this class is passed there and this method is called
+    if (!JNIInterface.tangoConnectFisheyeTexture()) {
       Log.e(TAG, "Failed to connect texture.");
       finish();
     }
