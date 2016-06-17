@@ -161,7 +161,7 @@ bool SynchronizationApplication::tangoConnectFisheyeTexture() {
     // graphic buffer directly. As we're interested in rendering the color image
     // in our render loop, we'll be polling for the color image as needed.
     TangoErrorType err = TangoService_connectTextureId(
-            TANGO_CAMERA_COLOR, color_image_.GetTextureId(), this, nullptr);
+            TANGO_CAMERA_FISHEYE, fisheye_image_.GetTextureId(), this, nullptr);
     return err == TANGO_SUCCESS;
 }
 

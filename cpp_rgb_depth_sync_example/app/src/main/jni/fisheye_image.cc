@@ -32,5 +32,5 @@ void FisheyeImage::InitializeGL() {
   glBindTexture(GL_TEXTURE_EXTERNAL_OES, 0);
 }
 
-FisheyeImage::~FisheyeImage() {}
+    FisheyeImage::~FisheyeImage() {}
 }  // namespace rgb_depth_sync

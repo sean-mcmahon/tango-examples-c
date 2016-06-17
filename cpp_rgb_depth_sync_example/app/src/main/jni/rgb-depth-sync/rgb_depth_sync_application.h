@@ -24,6 +24,7 @@
 #include <tango_support_api.h>
 #include <rgb-depth-sync/color_image.h>
 #include <rgb-depth-sync/depth_image.h>
+#include <rgb-depth-sync/fisheye_image.h>
 #include <rgb-depth-sync/scene.h>
 #include <rgb-depth-sync/util.h>
 #include <tango-gl/util.h>
@@ -115,6 +116,9 @@ class SynchronizationApplication {
  private:
   // RGB image
   ColorImage color_image_;
+
+  // RGB image
+  FisheyeImage fisheye_image_;
 
   // Depth image created by projecting Point Cloud onto RGB image plane.
   DepthImage depth_image_;

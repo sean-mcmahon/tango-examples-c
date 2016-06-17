@@ -24,7 +24,7 @@ namespace rgb_depth_sync {
 class FisheyeImage {
  public:
   FisheyeImage();
-  ~FigheyeImage();
+  ~FisheyeImage();
   GLuint GetTextureId() const { return texture_id_; }
 
   void InitializeGL();
