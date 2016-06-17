@@ -31,6 +31,7 @@ LOCAL_C_INCLUDES := $(PROJECT_ROOT)/tango-service-sdk/include/ \
 LOCAL_SRC_FILES := camera_texture_drawable.cc \
                    color_image.cc \
                    depth_image.cc \
+                   fisheye_image.cc \
                    jni_interface.cc \
                    rgb_depth_sync_application.cc \
                    scene.cc \
