@@ -44,7 +44,7 @@ public class JNIInterface {
 
   public static native boolean tangoConnectTexture();
 
-  //public static native boolean tangoConnectFisheyeTexture();
+  public static native boolean tangoConnectFisheyeTexture();
 
   public static native boolean tangoConnect();
 

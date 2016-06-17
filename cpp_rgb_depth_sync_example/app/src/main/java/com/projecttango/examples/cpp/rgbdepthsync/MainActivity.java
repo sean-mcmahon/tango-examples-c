@@ -186,11 +186,11 @@ public class MainActivity extends Activity {
     }
   }
 
-  /*public void FisheyeSurfaceCreated() {
+  public void FisheyeSurfaceCreated() {
     // This gets called in GLsurfaceRenderer.java an instance of this class is passed there and this method is called
     if (!JNIInterface.tangoConnectFisheyeTexture()) {
       Log.e(TAG, "Failed to connect texture.");
       finish();
     }
-  } */
+  }
 }
