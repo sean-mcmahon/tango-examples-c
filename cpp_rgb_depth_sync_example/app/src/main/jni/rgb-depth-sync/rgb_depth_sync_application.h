@@ -101,6 +101,9 @@ class SynchronizationApplication {
   // Main Render loop.
   void Render();
 
+  // SecondaryFisheye Render loop.
+  void RenderFisheye();
+
   // Set the transparency of Depth Image.
   void SetDepthAlphaValue(float alpha);
 
