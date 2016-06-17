@@ -74,6 +74,7 @@ void CameraTextureDrawable::InitializeGL() {
                         nullptr);
   glBindBuffer(GL_ARRAY_BUFFER, 0);
 
+
   color_texture_handle_ = glGetUniformLocation(shader_program_, "colorTexture");
   depth_texture_handle_ = glGetUniformLocation(shader_program_, "depthTexture");
   blend_alpha_handle_ = glGetUniformLocation(shader_program_, "blendAlpha");

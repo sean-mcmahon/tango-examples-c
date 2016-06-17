@@ -275,52 +275,7 @@ void SynchronizationApplication::Render() {
 }
 
     void SynchronizationApplication::RenderFisheye() {
-        double color_timestamp = 0.0;
-        double depth_timestamp = 0.0;
-        bool new_points = false;
-        TangoSupport_getLatestPointCloudAndNewDataFlag(point_cloud_manager_,
-                                                       &render_buffer_, &new_points);
-        depth_timestamp = render_buffer_->timestamp;
-        // We need to make sure that we update the texture associated with the color
-        // image.
-        if (TangoService_updateTexture(TANGO_CAMERA_COLOR, &color_timestamp) !=
-            TANGO_SUCCESS) {
-            LOGE("SynchronizationApplication: Failed to get a color image.");
-        }
-
-        // In the following code, we define t0 as the depth timestamp and t1 as the
-        // color camera timestamp.
-
-        // Calculate the relative pose from color camera frame at timestamp
-        // color_timestamp t1 and depth
-        // camera frame at depth_timestamp t0.
-        TangoPoseData pose_color_image_t1_T_depth_image_t0;
-        if (TangoSupport_calculateRelativePose(
-                color_timestamp, TANGO_COORDINATE_FRAME_CAMERA_COLOR, depth_timestamp,
-                TANGO_COORDINATE_FRAME_CAMERA_DEPTH,
-                &pose_color_image_t1_T_depth_image_t0) != TANGO_SUCCESS) {
-            LOGE(
-                    "SynchronizationApplication: Could not find a valid relative pose at "
-                            "time for color and "
-                            " depth cameras.");
-            return;
-        }
-
-        // The Color Camera frame at timestamp t0 with respect to Depth
-        // Camera frame at timestamp t1.
-        glm::mat4 color_image_t1_T_depth_image_t0 =
-                util::GetMatrixFromPose(&pose_color_image_t1_T_depth_image_t0);
-
-        if (gpu_upsample_) {
-            depth_image_.RenderDepthToTexture(color_image_t1_T_depth_image_t0,
-                                              render_buffer_,
-                                              new_points);
-        } else {
-            depth_image_.UpdateAndUpsampleDepth(color_image_t1_T_depth_image_t0,
-                                                render_buffer_);
-        }
-        main_scene_.Render(color_image_.GetTextureId(),
-                           depth_image_.GetTextureId());
+        main_scene_.Render(fisheye_image_.GetTextureId());
     }
 
 void SynchronizationApplication::SetDepthAlphaValue(float alpha) {
