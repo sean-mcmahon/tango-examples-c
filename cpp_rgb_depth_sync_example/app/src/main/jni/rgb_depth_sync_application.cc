@@ -239,6 +239,10 @@ void SynchronizationApplication::Render() {
     LOGE("SynchronizationApplication: Failed to get a color image.");
   }
 
+  if (TangoSupport_getLatestImageBufferAndNewDataFlag() != TANGO_SUCCESS) {
+        LOGE("SynchronizationApplication: Failed to get latest color image buffer.")
+    }
+
   // In the following code, we define t0 as the depth timestamp and t1 as the
   // color camera timestamp.
 
@@ -274,9 +278,9 @@ void SynchronizationApplication::Render() {
                          depth_image_.GetTextureId());
 }
 
-    void SynchronizationApplication::RenderFisheye() {
+    /*void SynchronizationApplication::RenderFisheye() {
         main_scene_.Render(fisheye_image_.GetTextureId());
-    }
+    }*/
 
 void SynchronizationApplication::SetDepthAlphaValue(float alpha) {
   main_scene_.SetDepthAlphaValue(alpha);

@@ -102,7 +102,7 @@ class SynchronizationApplication {
   void Render();
 
   // SecondaryFisheye Render loop.
-  void RenderFisheye();
+ // void RenderFisheye();
 
   // Set the transparency of Depth Image.
   void SetDepthAlphaValue(float alpha);
@@ -146,6 +146,7 @@ class SynchronizationApplication {
   // This TangoXYZij* points to the most recently produced
   // point cloud data which should be rendered.
   TangoXYZij* render_buffer_;
+  TangoImageBuffer* color_image_buffer_;
 
   bool gpu_upsample_;
 };
