@@ -229,6 +229,7 @@ void SynchronizationApplication::Render() {
   double color_timestamp = 0.0;
   double depth_timestamp = 0.0;
   bool new_points = false;
+  bool new_pointsTwo = false;
   TangoSupport_getLatestPointCloudAndNewDataFlag(point_cloud_manager_,
                                                  &render_buffer_, &new_points);
   depth_timestamp = render_buffer_->timestamp;
@@ -238,9 +239,9 @@ void SynchronizationApplication::Render() {
       TANGO_SUCCESS) {
     LOGE("SynchronizationApplication: Failed to get a color image.");
   }
-
-  if (TangoSupport_getLatestImageBufferAndNewDataFlag() != TANGO_SUCCESS) {
-        LOGE("SynchronizationApplication: Failed to get latest color image buffer.")
+    // Get latest colour image manger and buffer.
+  if (TangoSupport_getLatestImageBufferAndNewDataFlag(color_image_manager_, &color_image_buffer_,&new_pointsTwo) != TANGO_SUCCESS) {
+        LOGE("SynchronizationApplication: Failed to get latest color image buffer.");
     }
 
   // In the following code, we define t0 as the depth timestamp and t1 as the

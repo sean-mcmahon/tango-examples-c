@@ -142,6 +142,7 @@ class SynchronizationApplication {
   // The point_cloud_manager allows for thread safe reading and
   // writing of the point cloud data.
   TangoSupportPointCloudManager* point_cloud_manager_;
+  TangoSupportImageBufferManager* color_image_manager_;
 
   // This TangoXYZij* points to the most recently produced
   // point cloud data which should be rendered.
