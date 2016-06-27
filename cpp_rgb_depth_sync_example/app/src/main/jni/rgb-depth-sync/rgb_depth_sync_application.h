@@ -149,6 +149,9 @@ class SynchronizationApplication {
   TangoXYZij* render_buffer_;
   TangoImageBuffer* color_image_buffer_;
 
+ // Used to save data every x seconds
+ double time = 0.0;
+
   bool gpu_upsample_;
 };
 }  // namespace rgb_depth_sync

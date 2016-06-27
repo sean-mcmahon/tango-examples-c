@@ -230,6 +230,7 @@ void SynchronizationApplication::Render() {
   double depth_timestamp = 0.0;
   bool new_points = false;
   bool new_pointsTwo = false;
+    double timediff = 1;
   TangoSupport_getLatestPointCloudAndNewDataFlag(point_cloud_manager_,
                                                  &render_buffer_, &new_points);
   depth_timestamp = render_buffer_->timestamp;
@@ -262,6 +263,7 @@ void SynchronizationApplication::Render() {
     return;
   }
 
+
   // The Color Camera frame at timestamp t0 with respect to Depth
   // Camera frame at timestamp t1.
   glm::mat4 color_image_t1_T_depth_image_t0 =
@@ -275,6 +277,19 @@ void SynchronizationApplication::Render() {
         depth_image_.UpdateAndUpsampleDepth(color_image_t1_T_depth_image_t0,
                                             render_buffer_);
       }
+    // Save the colour image (color_image_buffer_ (struct)), depth image
+    // color_image_buffer_.depth_map_buffer_ (float vector), point cloud render_buffer_
+    // and pose info pose_color_image_t1_T_depth_image_t0.
+    // Save ONE instance of TangoCameraIntrinsics per recording
+    // Save any instance of TangoEvent
+    TangoEvent* myEventInstance;
+    if (depth_timestamp - time >= timediff)
+    {
+        // Save stuff
+
+        time = depth_timestamp
+
+    }
       main_scene_.Render(color_image_.GetTextureId(),
                          depth_image_.GetTextureId());
 }
