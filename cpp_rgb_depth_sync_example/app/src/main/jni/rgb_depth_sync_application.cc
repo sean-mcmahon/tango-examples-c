@@ -51,6 +51,8 @@ SynchronizationApplication::~SynchronizationApplication() {
   }
   TangoSupport_freePointCloudManager(point_cloud_manager_);
   point_cloud_manager_ = nullptr;
+    TangoSupport_freeImageBufferManager(color_image_manager_);
+    color_image_manager_ = nullptr;
 }
 
 bool SynchronizationApplication::CheckTangoVersion(JNIEnv* env,
@@ -139,6 +141,10 @@ bool SynchronizationApplication::TangoSetupConfig() {
       return false;
     }
   }
+    if (color_image_manager_ == nullptr) {
+        TANGO_HAL_PIXEL_FORMAT_RGBA_8888
+        err = TangoSupport_createImageBufferManager()
+    }
 
   return true;
 }
@@ -230,7 +236,7 @@ void SynchronizationApplication::Render() {
   double depth_timestamp = 0.0;
   bool new_points = false;
   bool new_pointsTwo = false;
-    double timediff = 1;
+    double timediff = 1.0;
   TangoSupport_getLatestPointCloudAndNewDataFlag(point_cloud_manager_,
                                                  &render_buffer_, &new_points);
   depth_timestamp = render_buffer_->timestamp;
@@ -286,8 +292,10 @@ void SynchronizationApplication::Render() {
     if (depth_timestamp - time >= timediff)
     {
         // Save stuff
+        LOGI("Saving Data Timestamp: %d", depth_timestamp);
 
-        time = depth_timestamp
+
+        time = depth_timestamp;
 
     }
       main_scene_.Render(color_image_.GetTextureId(),
