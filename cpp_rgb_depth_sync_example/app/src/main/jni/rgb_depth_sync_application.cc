@@ -253,6 +253,7 @@ void SynchronizationApplication::Render() {
   bool new_points = false;
   bool new_pointsTwo = false;
     double timediff = 1.0;
+    double difference = 0.0;
   TangoSupport_getLatestPointCloudAndNewDataFlag(point_cloud_manager_,
                                                  &render_buffer_, &new_points);
   depth_timestamp = render_buffer_->timestamp;
@@ -305,13 +306,14 @@ void SynchronizationApplication::Render() {
     // Save ONE instance of TangoCameraIntrinsics per recording
     // Save any instance of TangoEvent
     TangoEvent* myEventInstance;
-    
+
     // this isn't technically every second, as depth_timestamp only updates when a new point cloud
     // has been recorded.
-    if (depth_timestamp - time_buffer_ >= timediff)
+    difference = depth_timestamp - time_buffer_;
+    if (difference >= timediff)
     {
         // Save stuff
-        LOGI("Saving Data at Timestamp: %d with time buffer %d ", depth_timestamp, time_buffer_);
+        LOGI("Saving Data at Timestamp: %f with time buffer %f ", depth_timestamp, time_buffer_);
 
 
         time_buffer_ = depth_timestamp;
