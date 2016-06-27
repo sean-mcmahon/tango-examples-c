@@ -142,8 +142,24 @@ bool SynchronizationApplication::TangoSetupConfig() {
     }
   }
     if (color_image_manager_ == nullptr) {
-        TANGO_HAL_PIXEL_FORMAT_RGBA_8888
-        err = TangoSupport_createImageBufferManager()
+        TangoCameraIntrinsics color_camera_intrinsics;
+        TangoErrorType err = TangoService_getCameraIntrinsics(
+                TANGO_CAMERA_COLOR, &color_camera_intrinsics);
+        if (err != TANGO_SUCCESS) {
+            LOGE(
+                    "SynchronizationApplication: Failed to get the intrinsics for the color"
+                            "camera for intialising image buffer manager.");
+            return false;
+        }
+        int image_width_ = color_camera_intrinsics.width;
+        int image_height_ = color_camera_intrinsics.height;
+        err = TangoSupport_createImageBufferManager(TANGO_HAL_PIXEL_FORMAT_RGBA_8888, image_width_,
+                                                    image_height_, &color_image_manager_);
+        if (err != TANGO_SUCCESS)
+        {
+            LOGE("SynchronizationApplication: Failed to create image buffer manager.");
+            return false;
+        }
     }
 
   return true;
@@ -289,13 +305,13 @@ void SynchronizationApplication::Render() {
     // Save ONE instance of TangoCameraIntrinsics per recording
     // Save any instance of TangoEvent
     TangoEvent* myEventInstance;
-    if (depth_timestamp - time >= timediff)
+    if (depth_timestamp - time_buffer_ >= timediff)
     {
         // Save stuff
-        LOGI("Saving Data Timestamp: %d", depth_timestamp);
+        LOGI("Saving Data at Timestamp: %d with time buffer %d ", depth_timestamp, time_buffer_);
 
 
-        time = depth_timestamp;
+        time_buffer_ = depth_timestamp;
 
     }
       main_scene_.Render(color_image_.GetTextureId(),

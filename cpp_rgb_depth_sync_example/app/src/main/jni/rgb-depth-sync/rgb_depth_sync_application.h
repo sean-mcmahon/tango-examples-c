@@ -150,7 +150,7 @@ class SynchronizationApplication {
   TangoImageBuffer* color_image_buffer_;
 
  // Used to save data every x seconds
- double time = 0.0;
+ double time_buffer_ = 0.0;
 
   bool gpu_upsample_;
 };
