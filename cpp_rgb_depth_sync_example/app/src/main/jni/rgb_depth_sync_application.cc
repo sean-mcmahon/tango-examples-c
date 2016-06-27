@@ -323,7 +323,7 @@ void SynchronizationApplication::Render() {
             }
              */
             std::ofstream myfile;
-            myfile.open ("Example.txt");
+            myfile.open("/sdcard/Download/Example.txt");
             myfile << "Writing this to a file. \n";
             myfile.close();
             saving_to_file_=false;
