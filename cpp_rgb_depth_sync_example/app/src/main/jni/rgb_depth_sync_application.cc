@@ -252,8 +252,7 @@ void SynchronizationApplication::Render() {
   double depth_timestamp = 0.0;
   bool new_points = false;
   bool new_pointsTwo = false;
-    double timediff = 1.0;
-    double difference = 0.0;
+    double timediff = 0.99;
   TangoSupport_getLatestPointCloudAndNewDataFlag(point_cloud_manager_,
                                                  &render_buffer_, &new_points);
   depth_timestamp = render_buffer_->timestamp;
@@ -309,15 +308,14 @@ void SynchronizationApplication::Render() {
 
     // this isn't technically every second, as depth_timestamp only updates when a new point cloud
     // has been recorded.
-    difference = depth_timestamp - time_buffer_;
-    if (difference >= timediff)
+    if (depth_timestamp - time_buffer_ >= timediff)
     {
         // Save stuff
         LOGI("Saving Data at Timestamp: %f with time buffer %f ", depth_timestamp, time_buffer_);
+        
 
 
         time_buffer_ = depth_timestamp;
-
     }
       main_scene_.Render(color_image_.GetTextureId(),
                          depth_image_.GetTextureId());

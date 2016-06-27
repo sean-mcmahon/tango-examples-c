@@ -19,6 +19,7 @@
 
 #include <jni.h>
 #include <vector>
+#include <stdio.h>
 
 #include <tango_client_api.h>
 #include <tango_support_api.h>
