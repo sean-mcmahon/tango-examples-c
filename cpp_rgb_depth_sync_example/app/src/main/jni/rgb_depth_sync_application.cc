@@ -253,6 +253,7 @@ void SynchronizationApplication::Render() {
   bool new_points = false;
   bool new_pointsTwo = false;
     double timediff = 0.99;
+    bool saving_to_file_ = true;
   TangoSupport_getLatestPointCloudAndNewDataFlag(point_cloud_manager_,
                                                  &render_buffer_, &new_points);
   depth_timestamp = render_buffer_->timestamp;
@@ -312,8 +313,22 @@ void SynchronizationApplication::Render() {
     {
         // Save stuff
         LOGI("Saving Data at Timestamp: %f with time buffer %f ", depth_timestamp, time_buffer_);
-        
-
+        if (saving_to_file_ == true) {
+            /*
+            LOGI("SyncApplication: Saving Stuct to file!");
+            FILE *file = fopen("Test_mSave_File", "wb");
+            if (file != NULL) {
+                fwrite(color_image_buffer_, sizeof(struct TangoSupportImageBufferManager), 1, file);
+                fclose(file);
+            }
+             */
+            std::ofstream myfile;
+            myfile.open ("Example.txt");
+            myfile << "Writing this to a file. \n";
+            myfile.close();
+            saving_to_file_=false;
+            LOGI("Saved example file");
+        }
 
         time_buffer_ = depth_timestamp;
     }
