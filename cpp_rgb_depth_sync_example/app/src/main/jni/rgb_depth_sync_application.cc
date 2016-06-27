@@ -305,6 +305,9 @@ void SynchronizationApplication::Render() {
     // Save ONE instance of TangoCameraIntrinsics per recording
     // Save any instance of TangoEvent
     TangoEvent* myEventInstance;
+    
+    // this isn't technically every second, as depth_timestamp only updates when a new point cloud
+    // has been recorded.
     if (depth_timestamp - time_buffer_ >= timediff)
     {
         // Save stuff
