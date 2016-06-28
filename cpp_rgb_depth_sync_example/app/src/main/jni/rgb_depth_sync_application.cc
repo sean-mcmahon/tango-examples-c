@@ -255,6 +255,10 @@ void SynchronizationApplication::Render() {
   bool new_points = false;
   bool new_pointsTwo = false;
     double timediff = 0.99;
+    TangoCameraIntrinsics color_camera_intrinsics;
+    uint image_width_ = color_camera_intrinsics.width;
+    uint image_height_ = color_camera_intrinsics.height;
+    uint image_depth_ = 3;
 
   TangoSupport_getLatestPointCloudAndNewDataFlag(point_cloud_manager_,
                                                  &render_buffer_, &new_points);
@@ -325,11 +329,11 @@ void SynchronizationApplication::Render() {
             }
              */
 
-            /*std::ofstream myfile;
+            std::ofstream myfile;
             myfile.open("/sdcard/Download/Example.bin");
             myfile.write(reinterpret_cast<const char*>(&color_image_buffer_->data), std::streamsize(image_width_*image_height_*image_depth_));
             myfile.write(reinterpret_cast<const char*>(&color_image_buffer_->timestamp), sizeof(double));
-            myfile.close(); */
+            myfile.close();
             saving_to_file_=false;
             LOGI("Saved example file");
         }
