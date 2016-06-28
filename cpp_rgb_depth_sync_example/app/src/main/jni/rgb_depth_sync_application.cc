@@ -331,7 +331,7 @@ void SynchronizationApplication::Render() {
 
             std::ofstream myfile;
             myfile.open("/sdcard/Download/Example.bin");
-            myfile.write(reinterpret_cast<const char*>(&color_image_buffer_->data), std::streamsize(image_width_*image_height_*image_depth_));
+            //myfile.write(reinterpret_cast<const char*>(&color_image_buffer_->data), std::streamsize(image_width_*image_height_*image_depth_));
             myfile.write(reinterpret_cast<const char*>(&color_image_buffer_->timestamp), sizeof(double));
             myfile.close();
             saving_to_file_=false;
