@@ -154,6 +154,7 @@ class SynchronizationApplication {
 
  // Used to save data every x seconds
  double time_buffer_ = 0.0;
+ bool saving_to_file_ = true;
 
   bool gpu_upsample_;
 };

@@ -253,7 +253,7 @@ void SynchronizationApplication::Render() {
   bool new_points = false;
   bool new_pointsTwo = false;
     double timediff = 0.99;
-    bool saving_to_file_ = true;
+
   TangoSupport_getLatestPointCloudAndNewDataFlag(point_cloud_manager_,
                                                  &render_buffer_, &new_points);
   depth_timestamp = render_buffer_->timestamp;
@@ -325,6 +325,9 @@ void SynchronizationApplication::Render() {
             std::ofstream myfile;
             myfile.open("/sdcard/Download/Example.txt");
             myfile << "Writing this to a file. \n";
+            myfile.write(tiestamp, sizeof(double));
+            myfile.write(my_int, sizeof(int));
+            myfile.write(imdata, width*height*3);
             myfile.close();
             saving_to_file_=false;
             LOGI("Saved example file");
