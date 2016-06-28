@@ -323,11 +323,10 @@ void SynchronizationApplication::Render() {
             }
              */
             std::ofstream myfile;
-            myfile.open("/sdcard/Download/Example.txt");
+            myfile.open("/sdcard/Download/Example.bin");
             myfile << "Writing this to a file. \n";
-            myfile.write(tiestamp, sizeof(double));
-            myfile.write(my_int, sizeof(int));
             myfile.write(imdata, width*height*3);
+            myfile.write(color_image_buffer_.timestamp, sizeof(double));
             myfile.close();
             saving_to_file_=false;
             LOGI("Saved example file");
