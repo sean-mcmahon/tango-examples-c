@@ -80,6 +80,10 @@ bool SynchronizationApplication::TangoSetupConfig() {
   SetDepthAlphaValue(0.0);
   SetGPUUpsample(false);
 
+    TangoCameraIntrinsics color_camera_intrinsics;
+    int image_width_ = color_camera_intrinsics.width;
+    int image_height_ = color_camera_intrinsics.height;
+
   if (tango_config_ != nullptr) {
     return true;
   }
@@ -142,7 +146,6 @@ bool SynchronizationApplication::TangoSetupConfig() {
     }
   }
     if (color_image_manager_ == nullptr) {
-        TangoCameraIntrinsics color_camera_intrinsics;
         TangoErrorType err = TangoService_getCameraIntrinsics(
                 TANGO_CAMERA_COLOR, &color_camera_intrinsics);
         if (err != TANGO_SUCCESS) {
@@ -151,8 +154,7 @@ bool SynchronizationApplication::TangoSetupConfig() {
                             "camera for intialising image buffer manager.");
             return false;
         }
-        int image_width_ = color_camera_intrinsics.width;
-        int image_height_ = color_camera_intrinsics.height;
+
         err = TangoSupport_createImageBufferManager(TANGO_HAL_PIXEL_FORMAT_RGBA_8888, image_width_,
                                                     image_height_, &color_image_manager_);
         if (err != TANGO_SUCCESS)
@@ -305,7 +307,7 @@ void SynchronizationApplication::Render() {
     // and pose info pose_color_image_t1_T_depth_image_t0.
     // Save ONE instance of TangoCameraIntrinsics per recording
     // Save any instance of TangoEvent
-    TangoEvent* myEventInstance;
+    //TangoEvent* myEventInstance;
 
     // this isn't technically every second, as depth_timestamp only updates when a new point cloud
     // has been recorded.
@@ -322,12 +324,12 @@ void SynchronizationApplication::Render() {
                 fclose(file);
             }
              */
-            std::ofstream myfile;
+
+            /*std::ofstream myfile;
             myfile.open("/sdcard/Download/Example.bin");
-            myfile << "Writing this to a file. \n";
-            myfile.write(imdata, width*height*3);
-            myfile.write(color_image_buffer_.timestamp, sizeof(double));
-            myfile.close();
+            myfile.write(reinterpret_cast<const char*>(&color_image_buffer_->data), std::streamsize(image_width_*image_height_*image_depth_));
+            myfile.write(reinterpret_cast<const char*>(&color_image_buffer_->timestamp), sizeof(double));
+            myfile.close(); */
             saving_to_file_=false;
             LOGI("Saved example file");
         }

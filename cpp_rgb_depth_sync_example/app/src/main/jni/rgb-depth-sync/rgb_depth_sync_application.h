@@ -152,6 +152,11 @@ class SynchronizationApplication {
   TangoXYZij* render_buffer_;
   TangoImageBuffer* color_image_buffer_;
 
+ // Image Sizes
+ //uint32_t image_width_;
+ //uint32_t image_height_;
+ //const uint32_t image_depth_ = 3;
+
  // Used to save data every x seconds
  double time_buffer_ = 0.0;
  bool saving_to_file_ = true;
