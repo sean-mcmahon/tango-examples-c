@@ -332,10 +332,9 @@ void SynchronizationApplication::Render() {
             uint8_t testUint8 = 128;
             std::ofstream myfile;
             myfile.open("/sdcard/Download/color_timestamp_and_image.bin");
-
-            myfile.write(reinterpret_cast<const char*>(&color_timestamp), sizeof(double));
             //myfile.write(reinterpret_cast<const char*>(&testUint8), sizeof(uint8_t));
             myfile.write(reinterpret_cast<const char*>(&color_image_buffer_->data), std::streamsize(image_width_*image_height_*image_depth_));
+            myfile.write(reinterpret_cast<const char*>(&color_timestamp), sizeof(double));
             myfile.close();
             saving_to_file_=false;
             LOGI("Saved example file, timestamp: %f, sizeof: %d, image size %d ", color_timestamp,sizeof(double), std::streamsize(image_width_*image_height_*image_depth_));
