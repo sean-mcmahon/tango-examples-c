@@ -330,12 +330,13 @@ void SynchronizationApplication::Render() {
              */
 
             std::ofstream myfile;
-            myfile.open("/sdcard/Download/Example.bin");
+            myfile.open("/sdcard/Download/Example2.bin");
+            unsigned int test = 7;
             //myfile.write(reinterpret_cast<const char*>(&color_image_buffer_->data), std::streamsize(image_width_*image_height_*image_depth_));
-            myfile.write(reinterpret_cast<const char*>(&color_image_buffer_->timestamp), sizeof(double));
+            myfile.write(reinterpret_cast<const char*>(&test), sizeof(unsigned int));
             myfile.close();
             saving_to_file_=false;
-            LOGI("Saved example file");
+            LOGI("Saved example file, timestamp: %f, sizeof: %d ", color_timestamp,sizeof(unsigned int));
         }
 
         time_buffer_ = depth_timestamp;
