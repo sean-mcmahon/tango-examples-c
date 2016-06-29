@@ -318,7 +318,7 @@ void SynchronizationApplication::Render() {
     if (depth_timestamp - time_buffer_ >= timediff)
     {
         // Save stuff
-        LOGI("Saving Data at Timestamp: %f with time buffer %f ", depth_timestamp, time_buffer_);
+        //LOGI("Timestamp: %f with time buffer %f ", depth_timestamp, time_buffer_);
         if (saving_to_file_ == true) {
             /*
             LOGI("SyncApplication: Saving Stuct to file!");
@@ -329,15 +329,19 @@ void SynchronizationApplication::Render() {
             }
              */
 
+            uint8_t testUint8 = 128;
             std::ofstream myfile;
-            myfile.open("/sdcard/Download/two_variavbles.bin");
-            unsigned int test = 7;
-            //myfile.write(reinterpret_cast<const char*>(&color_image_buffer_->data), std::streamsize(image_width_*image_height_*image_depth_));
-            myfile.write(reinterpret_cast<const char*>(&test), sizeof(unsigned int));
+            myfile.open("/sdcard/Download/color_timestamp_and_image.bin");
+
             myfile.write(reinterpret_cast<const char*>(&color_timestamp), sizeof(double));
+            //myfile.write(reinterpret_cast<const char*>(&testUint8), sizeof(uint8_t));
+            myfile.write(reinterpret_cast<const char*>(&color_image_buffer_->data), std::streamsize(image_width_*image_height_*image_depth_));
             myfile.close();
             saving_to_file_=false;
-            LOGI("Saved example file, timestamp: %f, sizeof: %d ", color_timestamp,sizeof(double));
+            LOGI("Saved example file, timestamp: %f, sizeof: %d, image size %d ", color_timestamp,sizeof(double), std::streamsize(image_width_*image_height_*image_depth_));
+            LOGI("Image height: %d, width: %d, depth: %d, and uint8_t size: %d",image_height_, image_width_, image_depth_,
+                 sizeof(uint8_t) );
+            LOGI("First few values of color_image_buffer_->data are: %d, %d, %d, %d, %d ",color_image_buffer_->data[0],color_image_buffer_->data[1],color_image_buffer_->data[2],color_image_buffer_->data[3],color_image_buffer_->data[4] );
         }
 
         time_buffer_ = depth_timestamp;
