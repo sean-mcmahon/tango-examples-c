@@ -80,10 +80,6 @@ bool SynchronizationApplication::TangoSetupConfig() {
   SetDepthAlphaValue(0.0);
   SetGPUUpsample(false);
 
-    TangoCameraIntrinsics color_camera_intrinsics;
-    int image_width_ = color_camera_intrinsics.width;
-    int image_height_ = color_camera_intrinsics.height;
-
   if (tango_config_ != nullptr) {
     return true;
   }
@@ -146,14 +142,14 @@ bool SynchronizationApplication::TangoSetupConfig() {
     }
   }
     if (color_image_manager_ == nullptr) {
-        TangoErrorType err = TangoService_getCameraIntrinsics(
+        /*TangoErrorType err = TangoService_getCameraIntrinsics(
                 TANGO_CAMERA_COLOR, &color_camera_intrinsics);
         if (err != TANGO_SUCCESS) {
             LOGE(
                     "SynchronizationApplication: Failed to get the intrinsics for the color"
                             "camera for intialising image buffer manager.");
             return false;
-        }
+        } */
 
         err = TangoSupport_createImageBufferManager(TANGO_HAL_PIXEL_FORMAT_RGBA_8888, image_width_,
                                                     image_height_, &color_image_manager_);
@@ -224,6 +220,8 @@ bool SynchronizationApplication::TangoSetIntrinsicsAndExtrinsics() {
         "camera.");
     return false;
   }
+  image_width_ = color_camera_intrinsics.width;
+  image_height_ =  color_camera_intrinsics.height;
   depth_image_.SetCameraIntrinsics(color_camera_intrinsics);
   main_scene_.SetCameraIntrinsics(color_camera_intrinsics);
 
@@ -255,11 +253,6 @@ void SynchronizationApplication::Render() {
   bool new_points = false;
   bool new_pointsTwo = false;
     double timediff = 0.99;
-    TangoCameraIntrinsics color_camera_intrinsics;
-    uint32_t image_width_ = color_camera_intrinsics.width;
-    uint32_t image_height_ = color_camera_intrinsics.height;
-    uint32_t image_depth_ = 3;
-
   TangoSupport_getLatestPointCloudAndNewDataFlag(point_cloud_manager_,
                                                  &render_buffer_, &new_points);
   depth_timestamp = render_buffer_->timestamp;
@@ -340,10 +333,10 @@ void SynchronizationApplication::Render() {
             myfile.write(reinterpret_cast<const char*>(&color_timestamp), sizeof(double));
             myfile.close();
             saving_to_file_=false;
-            LOGI("Saved example file, timestamp: %f, sizeof: %d, image size %u ", color_timestamp,sizeof(double), std::streamsize(image_width_*image_height_*image_depth_));
-            LOGI("Camera Image height: %u, width: %u, depth: %u, and uint8_t size: %d",image_height_, image_width_, image_depth_,
+            LOGI("Saved example file, timestamp: %f, sizeof: %zu, image size %u ", color_timestamp,sizeof(double), std::streamsize(image_width_*image_height_*image_depth_));
+            LOGI("Camera Image height: %d, width: %d, depth: %d, and uint8_t size: %zu",image_height_, image_width_, image_depth_,
                  sizeof(uint8_t) );
-            LOGI("Color image height: %u, width: %u, depth: %u, image_length %u and uint8_t size: %d",color_image_buffer_->height, color_image_buffer_->width, image_depth_,
+            LOGI("Color image height: %d, width: %d, depth: %d, image_length %d and uint8_t size: %zu",color_image_buffer_->height, color_image_buffer_->width, image_depth_,
                  color_image_buffer_->height*color_image_buffer_->width,sizeof(uint8_t) );
             LOGI("First few values of color_image_buffer_->data are: %u, %u, %u, %u, %u ",color_image_buffer_->data[0],color_image_buffer_->data[1],color_image_buffer_->data[2],color_image_buffer_->data[3],color_image_buffer_->data[4] );
         }

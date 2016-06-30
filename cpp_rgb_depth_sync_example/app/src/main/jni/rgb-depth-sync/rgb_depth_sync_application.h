@@ -153,9 +153,9 @@ class SynchronizationApplication {
   TangoImageBuffer* color_image_buffer_;
 
  // Image Sizes
- //uint32_t image_width_;
- //uint32_t image_height_;
- //const uint32_t image_depth_ = 3;
+ int image_width_;
+ int image_height_;
+ const int image_depth_ = 3;
 
  // Used to save data every x seconds
  double time_buffer_ = 0.0;
