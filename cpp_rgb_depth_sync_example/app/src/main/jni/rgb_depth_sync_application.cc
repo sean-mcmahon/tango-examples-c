@@ -256,18 +256,20 @@ void SynchronizationApplication::Render() {
   bool new_pointsTwo = false;
     double timediff = 0.99;
     TangoCameraIntrinsics color_camera_intrinsics;
-    uint image_width_ = color_camera_intrinsics.width;
-    uint image_height_ = color_camera_intrinsics.height;
-    uint image_depth_ = 3;
+    uint32_t image_width_ = color_camera_intrinsics.width;
+    uint32_t image_height_ = color_camera_intrinsics.height;
+    uint32_t image_depth_ = 3;
 
   TangoSupport_getLatestPointCloudAndNewDataFlag(point_cloud_manager_,
                                                  &render_buffer_, &new_points);
   depth_timestamp = render_buffer_->timestamp;
   // We need to make sure that we update the texture associated with the color
   // image.
+  successful_color_image_retreval = true;
   if (TangoService_updateTexture(TANGO_CAMERA_COLOR, &color_timestamp) !=
       TANGO_SUCCESS) {
     LOGE("SynchronizationApplication: Failed to get a color image.");
+      successful_color_image_retreval = false;
   }
     // Get latest colour image manger and buffer.
   if (TangoSupport_getLatestImageBufferAndNewDataFlag(color_image_manager_, &color_image_buffer_,&new_pointsTwo) != TANGO_SUCCESS) {
@@ -319,7 +321,7 @@ void SynchronizationApplication::Render() {
     {
         // Save stuff
         //LOGI("Timestamp: %f with time buffer %f ", depth_timestamp, time_buffer_);
-        if (saving_to_file_ == true) {
+        if (saving_to_file_ == true && successful_color_image_retreval==true) {
             /*
             LOGI("SyncApplication: Saving Stuct to file!");
             FILE *file = fopen("Test_mSave_File", "wb");
@@ -331,16 +333,17 @@ void SynchronizationApplication::Render() {
 
             uint8_t testUint8 = 128;
             std::ofstream myfile;
-            myfile.open("/sdcard/Download/color_timestamp_and_image.bin");
+            myfile.open("/sdcard/Download/color_imagePixel_timestamp.bin");
             //myfile.write(reinterpret_cast<const char*>(&testUint8), sizeof(uint8_t));
+            //myfile.write(reinterpret_cast<const char*>(color_image_buffer_->data[0]), sizeof(uint8_t));
             myfile.write(reinterpret_cast<const char*>(&color_image_buffer_->data), std::streamsize(image_width_*image_height_*image_depth_));
             myfile.write(reinterpret_cast<const char*>(&color_timestamp), sizeof(double));
             myfile.close();
             saving_to_file_=false;
             LOGI("Saved example file, timestamp: %f, sizeof: %d, image size %d ", color_timestamp,sizeof(double), std::streamsize(image_width_*image_height_*image_depth_));
-            LOGI("Image height: %d, width: %d, depth: %d, and uint8_t size: %d",image_height_, image_width_, image_depth_,
+            LOGI("Image height: %u, width: %u, depth: %u, and uint8_t size: %d",image_height_, image_width_, image_depth_,
                  sizeof(uint8_t) );
-            LOGI("First few values of color_image_buffer_->data are: %d, %d, %d, %d, %d ",color_image_buffer_->data[0],color_image_buffer_->data[1],color_image_buffer_->data[2],color_image_buffer_->data[3],color_image_buffer_->data[4] );
+            LOGI("First few values of color_image_buffer_->data are: %u, %u, %u, %u, %u ",color_image_buffer_->data[0],color_image_buffer_->data[1],color_image_buffer_->data[2],color_image_buffer_->data[3],color_image_buffer_->data[4] );
         }
 
         time_buffer_ = depth_timestamp;
