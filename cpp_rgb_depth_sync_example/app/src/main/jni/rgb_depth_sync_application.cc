@@ -51,8 +51,8 @@ SynchronizationApplication::~SynchronizationApplication() {
   }
   TangoSupport_freePointCloudManager(point_cloud_manager_);
   point_cloud_manager_ = nullptr;
-    TangoSupport_freeImageBufferManager(color_image_manager_);
-    color_image_manager_ = nullptr;
+  TangoSupport_freeImageBufferManager(color_image_manager_);
+  color_image_manager_ = nullptr;
 }
 
 bool SynchronizationApplication::CheckTangoVersion(JNIEnv* env,
@@ -193,6 +193,7 @@ bool SynchronizationApplication::TangoConnectCallbacks() {
   // our poses will be driven by timestamps. As such, we'll use GetPoseAtTime.
   TangoErrorType depth_ret =
       TangoService_connectOnXYZijAvailable(OnXYZijAvailableRouter);
+  TangoSupport_updateImageBuffer(color_image_manager_, color_image_buffer_);
   return depth_ret == TANGO_SUCCESS;
 }
 
@@ -265,9 +266,7 @@ void SynchronizationApplication::Render() {
       successful_color_image_retreval = false;
   }
     // Get latest colour image manger and buffer.
-  if (TangoSupport_getLatestImageBufferAndNewDataFlag(color_image_manager_, &color_image_buffer_,&new_pointsTwo) != TANGO_SUCCESS) {
-        LOGE("SynchronizationApplication: Failed to get latest color image buffer.");
-    }
+  TangoSupport_getLatestImageBufferAndNewDataFlag(color_image_manager_, &color_image_buffer_,&new_pointsTwo);
 
   // In the following code, we define t0 as the depth timestamp and t1 as the
   // color camera timestamp.
@@ -334,9 +333,9 @@ void SynchronizationApplication::Render() {
             myfile.close();
             saving_to_file_=false;
             LOGI("Saved example file, timestamp: %f, sizeof: %zu, image size %u ", color_timestamp,sizeof(double), std::streamsize(image_width_*image_height_*image_depth_));
-            LOGI("Camera Image height: %d, width: %d, depth: %d, and uint8_t size: %zu",image_height_, image_width_, image_depth_,
+            LOGI("ColorCameraIntinsics. height: %d, width: %d, depth: %d, and uint8_t size: %zu",image_height_, image_width_, image_depth_,
                  sizeof(uint8_t) );
-            LOGI("Color image height: %d, width: %d, depth: %d, image_length %d and uint8_t size: %zu",color_image_buffer_->height, color_image_buffer_->width, image_depth_,
+            LOGI("ColorImageBuffer. height: %d, width: %d, depth: %d, image_length %d and uint8_t size: %zu",color_image_buffer_->height, color_image_buffer_->width, image_depth_,
                  color_image_buffer_->height*color_image_buffer_->width,sizeof(uint8_t) );
             LOGI("First few values of color_image_buffer_->data are: %u, %u, %u, %u, %u ",color_image_buffer_->data[0],color_image_buffer_->data[1],color_image_buffer_->data[2],color_image_buffer_->data[3],color_image_buffer_->data[4] );
         }
