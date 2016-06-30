@@ -34,6 +34,7 @@ void OnXYZijAvailableRouter(void* context, const TangoXYZij* xyz_ij) {
 void SynchronizationApplication::OnXYZijAvailable(const TangoXYZij* xyz_ij) {
   // We'll just update the point cloud associated with our depth image.
   TangoSupport_updatePointCloud(point_cloud_manager_, xyz_ij);
+  TangoSupport_updateImageBuffer(color_image_manager_, color_image_buffer_);
 }
 
 SynchronizationApplication::SynchronizationApplication()
@@ -193,7 +194,6 @@ bool SynchronizationApplication::TangoConnectCallbacks() {
   // our poses will be driven by timestamps. As such, we'll use GetPoseAtTime.
   TangoErrorType depth_ret =
       TangoService_connectOnXYZijAvailable(OnXYZijAvailableRouter);
-  TangoSupport_updateImageBuffer(color_image_manager_, color_image_buffer_);
   return depth_ret == TANGO_SUCCESS;
 }
 
