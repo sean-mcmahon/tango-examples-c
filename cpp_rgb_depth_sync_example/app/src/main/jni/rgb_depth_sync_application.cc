@@ -34,7 +34,7 @@ void OnXYZijAvailableRouter(void* context, const TangoXYZij* xyz_ij) {
 void SynchronizationApplication::OnXYZijAvailable(const TangoXYZij* xyz_ij) {
   // We'll just update the point cloud associated with our depth image.
   TangoSupport_updatePointCloud(point_cloud_manager_, xyz_ij);
-  TangoSupport_updateImageBuffer(color_image_manager_, color_image_buffer_);
+  //TangoSupport_updateImageBuffer(color_image_manager_, color_image_buffer_);
 }
 
 SynchronizationApplication::SynchronizationApplication()
@@ -266,6 +266,7 @@ void SynchronizationApplication::Render() {
       successful_color_image_retreval = false;
   }
     // Get latest colour image manger and buffer.
+  //TangoSupport_updateImageBuffer(color_image_manager_, color_image_buffer_);
   TangoSupport_getLatestImageBufferAndNewDataFlag(color_image_manager_, &color_image_buffer_,&new_pointsTwo);
 
   // In the following code, we define t0 as the depth timestamp and t1 as the
@@ -335,8 +336,8 @@ void SynchronizationApplication::Render() {
             LOGI("Saved example file, timestamp: %f, sizeof: %zu, image size %u ", color_timestamp,(sizeof(color_image_buffer_->data)/sizeof(*color_image_buffer_->data)), std::streamsize(image_width_*image_height_*image_depth_));
             LOGI("ColorCameraIntinsics. height: %d, width: %d, depth: %d, and uint8_t size: %zu",image_height_, image_width_, image_depth_,
                  sizeof(uint8_t) );
-            LOGI("ColorImageBuffer. height: %d, width: %d, depth: %d, image_length %d and uint8_t size: %zu",color_image_buffer_->height, color_image_buffer_->width, image_depth_,
-                 color_image_buffer_->height*color_image_buffer_->width,sizeof(uint8_t) );
+            LOGI("ColorImageBuffer. height: %d, width: %d, depth: %d, image_length %d, buffer timestamp %f, and uint8_t size: %zu",color_image_buffer_->height, color_image_buffer_->width, image_depth_,
+                 color_image_buffer_->height*color_image_buffer_->width,color_image_buffer_->timestamp ,sizeof(uint8_t) );
             LOGI("First few values of color_image_buffer_->data are: %u, %u, %u, %u, %u ",color_image_buffer_->data[0],color_image_buffer_->data[1],color_image_buffer_->data[2],color_image_buffer_->data[3],color_image_buffer_->data[4] );
         }
 
