@@ -335,14 +335,16 @@ void SynchronizationApplication::Render() {
             std::ofstream myfile;
             myfile.open("/sdcard/Download/color_imagePixel_timestamp.bin");
             //myfile.write(reinterpret_cast<const char*>(&testUint8), sizeof(uint8_t));
-            //myfile.write(reinterpret_cast<const char*>(color_image_buffer_->data[0]), sizeof(uint8_t));
+            //myfile.write(reinterpret_cast<const char*>(&color_image_buffer_->data[0]), sizeof(uint8_t));
             myfile.write(reinterpret_cast<const char*>(&color_image_buffer_->data), std::streamsize(image_width_*image_height_*image_depth_));
             myfile.write(reinterpret_cast<const char*>(&color_timestamp), sizeof(double));
             myfile.close();
             saving_to_file_=false;
-            LOGI("Saved example file, timestamp: %f, sizeof: %d, image size %d ", color_timestamp,sizeof(double), std::streamsize(image_width_*image_height_*image_depth_));
-            LOGI("Image height: %u, width: %u, depth: %u, and uint8_t size: %d",image_height_, image_width_, image_depth_,
+            LOGI("Saved example file, timestamp: %f, sizeof: %d, image size %u ", color_timestamp,sizeof(double), std::streamsize(image_width_*image_height_*image_depth_));
+            LOGI("Camera Image height: %u, width: %u, depth: %u, and uint8_t size: %d",image_height_, image_width_, image_depth_,
                  sizeof(uint8_t) );
+            LOGI("Color image height: %u, width: %u, depth: %u, image_length %u and uint8_t size: %d",color_image_buffer_->height, color_image_buffer_->width, image_depth_,
+                 color_image_buffer_->height*color_image_buffer_->width,sizeof(uint8_t) );
             LOGI("First few values of color_image_buffer_->data are: %u, %u, %u, %u, %u ",color_image_buffer_->data[0],color_image_buffer_->data[1],color_image_buffer_->data[2],color_image_buffer_->data[3],color_image_buffer_->data[4] );
         }
 
