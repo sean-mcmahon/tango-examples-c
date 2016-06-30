@@ -332,7 +332,7 @@ void SynchronizationApplication::Render() {
             myfile.write(reinterpret_cast<const char*>(&color_timestamp), sizeof(double));
             myfile.close();
             saving_to_file_=false;
-            LOGI("Saved example file, timestamp: %f, sizeof: %zu, image size %u ", color_timestamp,sizeof(double), std::streamsize(image_width_*image_height_*image_depth_));
+            LOGI("Saved example file, timestamp: %f, sizeof: %zu, image size %u ", color_timestamp,(sizeof(color_image_buffer_->data)/sizeof(*color_image_buffer_->data)), std::streamsize(image_width_*image_height_*image_depth_));
             LOGI("ColorCameraIntinsics. height: %d, width: %d, depth: %d, and uint8_t size: %zu",image_height_, image_width_, image_depth_,
                  sizeof(uint8_t) );
             LOGI("ColorImageBuffer. height: %d, width: %d, depth: %d, image_length %d and uint8_t size: %zu",color_image_buffer_->height, color_image_buffer_->width, image_depth_,
