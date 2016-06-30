@@ -331,15 +331,15 @@ void SynchronizationApplication::Render() {
             std::ofstream myfile;
             myfile.open("/sdcard/Download/color_imagePixel_timestamp.bin");
             //myfile.write(reinterpret_cast<const char*>(&testUint8), sizeof(uint8_t));
-            //myfile.write(reinterpret_cast<const char*>(&color_image_buffer_->data[0]), sizeof(uint8_t));
-            myfile.write(reinterpret_cast<const char*>(&color_image_buffer_->data), std::streamsize(image_width_*image_height_*image_depth_));
+            //myfile.write(reinterpret_cast<const char*>(&color_image_buffer_->data[1]), sizeof(uint8_t));
+            myfile.write(reinterpret_cast<const char*>(&color_image_buffer_->data[0]), std::streamsize(image_width_*image_height_*image_depth_));
             myfile.write(reinterpret_cast<const char*>(&color_timestamp), sizeof(double));
             myfile.close();
             saving_to_file_=false;
             LOGI("Saved example file, timestamp: %f, sizeof: %zu, image size %u ", color_timestamp,(sizeof(color_image_buffer_->data)/sizeof(*color_image_buffer_->data)), std::streamsize(image_width_*image_height_*image_depth_));
             LOGI("ColorCameraIntinsics. height: %d, width: %d, depth: %d, and uint8_t size: %zu",image_height_, image_width_, image_depth_,
                  sizeof(uint8_t) );
-            LOGI("ColorImageBuffer. height: %d, width: %d, depth: %d, image_length %d, buffer timestamp %f, and uint8_t size: %zu",render_buffer_->color_image->height, color_image_buffer_->width, image_depth_,
+            LOGI("ColorImageBuffer. height: %d, width: %d, depth: %d, image_length %d, buffer timestamp %f, and uint8_t size: %zu",color_image_buffer_->width, color_image_buffer_->width, image_depth_,
                  color_image_buffer_->height*color_image_buffer_->width,color_image_buffer_->timestamp ,sizeof(uint8_t) );
             LOGI("First few values of color_image_buffer_->data are: %u, %u, %u, %u, %u ",color_image_buffer_->data[0],color_image_buffer_->data[1],color_image_buffer_->data[2],color_image_buffer_->data[3],color_image_buffer_->data[4] );
         }
