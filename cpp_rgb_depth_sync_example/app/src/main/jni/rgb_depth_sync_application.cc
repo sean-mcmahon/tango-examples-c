@@ -337,13 +337,15 @@ void SynchronizationApplication::Render() {
             myfile.write((char*)&(depth_image_.depth_map_buffer_[0]),depth_image_.depth_map_buffer_.size() *
                     sizeof(float));
             myfile.close();
-            saving_to_file_=false;
+            //saving_to_file_=false;
             LOGI("Saved example file, timestamp: %f, sizeof: %zu, image size %u ", color_timestamp,sizeof(float), std::streamsize(image_width_*image_height_*image_depth_));
             LOGI("ColorCameraIntinsics. height: %d, width: %d, depth: %d, and uint8_t size: %zu",image_height_, image_width_, image_depth_,
                  sizeof(uint8_t) );
             LOGI("ColorImageBuffer. height: %d, width: %d, depth: %d, image_length %d, buffer timestamp %f, and uint8_t size: %zu",color_image_buffer_->width, color_image_buffer_->width, image_depth_,
                  color_image_buffer_->height*color_image_buffer_->width,color_image_buffer_->timestamp ,sizeof(uint8_t) );
-            LOGI("First few values of color_image_buffer_->data are: %u, %u, %u, %u, %u ",color_image_buffer_->data[0],color_image_buffer_->data[1],color_image_buffer_->data[2],color_image_buffer_->data[3],color_image_buffer_->data[4] );
+//            LOGI("First few values of color_image_buffer_->data are: %u, %u, %u, %u, %u ",color_image_buffer_->data[0],color_image_buffer_->data[1],color_image_buffer_->data[2],color_image_buffer_->data[3],color_image_buffer_->data[4] );
+            LOGI("First few values of depth_image_buffer are: %f,%f,%f,%f,%f ",depth_image_.depth_map_buffer_[50],depth_image_.depth_map_buffer_[100],depth_image_.depth_map_buffer_[200],depth_image_.depth_map_buffer_[300],depth_image_.depth_map_buffer_[400] );
+
         }
 
         time_buffer_ = depth_timestamp;
