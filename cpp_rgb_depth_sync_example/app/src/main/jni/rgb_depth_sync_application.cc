@@ -328,13 +328,17 @@ void SynchronizationApplication::Render() {
              */
 
             uint8_t testUint8 = 128;
+            std::vector<float> my_depth_image_buffer_ = depth_image_.getDepthMapBuffer();
+            if (my_depth_image_buffer_.empty()) {
+                LOGE("SynchronizationApplication::Render - Depth image buffer empty!");
+            }
             std::ofstream myfile;
             myfile.open("/sdcard/Download/depth_image.bin");
             //myfile.write(reinterpret_cast<const char*>(&testUint8), sizeof(uint8_t));
             //myfile.write(reinterpret_cast<const char*>(&color_image_buffer_->data[1]), sizeof(uint8_t));
 //            myfile.write(reinterpret_cast<const char*>(&color_image_buffer_->data[0]), std::streamsize(image_width_*image_height_*image_depth_));
 //            myfile.write(reinterpret_cast<const char*>(&color_timestamp), sizeof(double));
-            myfile.write((char*)&(depth_image_.depth_map_buffer_[0]),depth_image_.depth_map_buffer_.size() *
+            myfile.write((char*)&(my_depth_image_buffer_[0]),my_depth_image_buffer_.size() *
                     sizeof(float));
             myfile.close();
             //saving_to_file_=false;
@@ -344,7 +348,7 @@ void SynchronizationApplication::Render() {
             LOGI("ColorImageBuffer. height: %d, width: %d, depth: %d, image_length %d, buffer timestamp %f, and uint8_t size: %zu",color_image_buffer_->width, color_image_buffer_->width, image_depth_,
                  color_image_buffer_->height*color_image_buffer_->width,color_image_buffer_->timestamp ,sizeof(uint8_t) );
 //            LOGI("First few values of color_image_buffer_->data are: %u, %u, %u, %u, %u ",color_image_buffer_->data[0],color_image_buffer_->data[1],color_image_buffer_->data[2],color_image_buffer_->data[3],color_image_buffer_->data[4] );
-            LOGI("First few values of depth_image_buffer are: %f,%f,%f,%f,%f ",depth_image_.depth_map_buffer_[50],depth_image_.depth_map_buffer_[100],depth_image_.depth_map_buffer_[200],depth_image_.depth_map_buffer_[300],depth_image_.depth_map_buffer_[400] );
+            LOGI("First some values of depth_image_buffer are: %f,%f,%f,%f,%f ",my_depth_image_buffer_[50],my_depth_image_buffer_[100],my_depth_image_buffer_[200],my_depth_image_buffer_[220400],my_depth_image_buffer_[230400] );
 
         }
 

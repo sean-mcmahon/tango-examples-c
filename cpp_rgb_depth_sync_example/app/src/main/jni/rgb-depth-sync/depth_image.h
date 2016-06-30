@@ -75,7 +75,8 @@ class DepthImage {
   // and undistort the image to the right size.
   void SetCameraIntrinsics(TangoCameraIntrinsics intrinsics);
 
- std::vector<float> depth_map_buffer_;
+ // Return the depth image buffer vector
+ std::vector<float> getDepthMapBuffer() const { return depth_map_buffer_;}
 
  private:
   // Initialize the OpenGL structures needed to render depth image to texture.
@@ -128,7 +129,7 @@ class DepthImage {
   // The backing texture for GPU texture generation.
   GLuint gpu_texture_id_;
 
-//  std::vector<float> depth_map_buffer_;
+  std::vector<float> depth_map_buffer_;
 
   // Color map buffer is for the texture render purpose, this value is written
   // to the texture id buffer, and display as GL_LUMINANCE value.
