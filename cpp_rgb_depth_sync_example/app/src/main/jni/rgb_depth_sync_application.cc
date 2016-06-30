@@ -348,7 +348,7 @@ void SynchronizationApplication::Render() {
             LOGI("ColorImageBuffer. height: %d, width: %d, depth: %d, image_length %d, buffer timestamp %f, and uint8_t size: %zu",color_image_buffer_->width, color_image_buffer_->width, image_depth_,
                  color_image_buffer_->height*color_image_buffer_->width,color_image_buffer_->timestamp ,sizeof(uint8_t) );
 //            LOGI("First few values of color_image_buffer_->data are: %u, %u, %u, %u, %u ",color_image_buffer_->data[0],color_image_buffer_->data[1],color_image_buffer_->data[2],color_image_buffer_->data[3],color_image_buffer_->data[4] );
-            LOGI("First some values of depth_image_buffer are: %f,%f,%f,%f,%f ",my_depth_image_buffer_[50],my_depth_image_buffer_[100],my_depth_image_buffer_[200],my_depth_image_buffer_[220400],my_depth_image_buffer_[230400] );
+            LOGI("First some values of depth_image_buffer are: %f,%f,%f,%f,%f ",my_depth_image_buffer_[50],my_depth_image_buffer_[220395],my_depth_image_buffer_[220405],my_depth_image_buffer_[220400],my_depth_image_buffer_[230400] );
 
         }
 
