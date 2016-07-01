@@ -151,7 +151,7 @@ bool SynchronizationApplication::TangoSetupConfig() {
                             "camera for intialising image buffer manager.");
             return false;
         } */
-        LOGI("SynchronizationApplication: Initialising ImageBufferManager, dimensions are: width %d, height %d",image_width_, image_height_);
+        LOGE("SynchronizationApplication: Initialising ImageBufferManager, dimensions are: width %d, height %d",image_width_, image_height_);
 
         err = TangoSupport_createImageBufferManager(TANGO_HAL_PIXEL_FORMAT_RGBA_8888, image_width_,
                                                     image_height_, &color_image_manager_);
