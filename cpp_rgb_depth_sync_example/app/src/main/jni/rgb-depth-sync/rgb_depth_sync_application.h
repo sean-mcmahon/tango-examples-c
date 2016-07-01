@@ -145,6 +145,9 @@ class SynchronizationApplication {
   // The point_cloud_manager allows for thread safe reading and
   // writing of the point cloud data.
   TangoSupportPointCloudManager* point_cloud_manager_;
+
+ // ?? The image buffer manager allows for thread safe reading and writing of the
+ // color image data
   TangoSupportImageBufferManager* color_image_manager_;
 
   // This TangoXYZij* points to the most recently produced
@@ -159,7 +162,7 @@ class SynchronizationApplication {
 
  // Used to save data every x seconds
  double time_buffer_ = 0.0;
- bool saving_to_file_ = true;
+ bool saving_to_file_ = false;
  bool successful_color_image_retreval = false;
 
   bool gpu_upsample_;
