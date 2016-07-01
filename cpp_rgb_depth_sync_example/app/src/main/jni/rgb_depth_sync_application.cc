@@ -151,7 +151,6 @@ bool SynchronizationApplication::TangoSetupConfig() {
                             "camera for intialising image buffer manager.");
             return false;
         } */
-        LOGE("SynchronizationApplication: Initialising ImageBufferManager, dimensions are: width %d, height %d",image_width_, image_height_);
 
         err = TangoSupport_createImageBufferManager(TANGO_HAL_PIXEL_FORMAT_RGBA_8888, image_width_,
                                                     image_height_, &color_image_manager_);
@@ -257,6 +256,12 @@ void SynchronizationApplication::Render() {
     double timediff = 0.99;
   TangoSupport_getLatestPointCloudAndNewDataFlag(point_cloud_manager_,
                                                  &render_buffer_, &new_points);
+    // Get latest colour image manger and buffer.
+    //TangoSupport_updateImageBuffer(color_image_manager_, color_image_buffer_)
+    if (TangoSupport_getLatestImageBufferAndNewDataFlag(color_image_manager_, &color_image_buffer_,&new_pointsTwo)!= TANGO_SUCCESS) {
+        LOGE("ERROR: gettting latest image buffer failure");
+    }
+    LOGI("New points: %d", new_pointsTwo);
   depth_timestamp = render_buffer_->timestamp;
   // We need to make sure that we update the texture associated with the color
   // image.
@@ -266,9 +271,7 @@ void SynchronizationApplication::Render() {
     LOGE("SynchronizationApplication: Failed to get a color image.");
       successful_color_image_retreval = false;
   }
-    // Get latest colour image manger and buffer.
-  //TangoSupport_updateImageBuffer(color_image_manager_, color_image_buffer_);
-  TangoSupport_getLatestImageBufferAndNewDataFlag(color_image_manager_, &color_image_buffer_,&new_pointsTwo);
+
 
   // In the following code, we define t0 as the depth timestamp and t1 as the
   // color camera timestamp.
@@ -343,14 +346,19 @@ void SynchronizationApplication::Render() {
 //                    sizeof(float));
             myfile.close();
             //saving_to_file_=false;
-            LOGI("Saved example file, timestamp: %f, sizeof: %zu, image size %u ", color_timestamp,sizeof(float), std::streamsize(image_width_*image_height_*image_depth_));
-            LOGI("ColorCameraIntinsics. height: %d, width: %d, depth: %d, and uint8_t size: %zu",image_height_, image_width_, image_depth_,
-                 sizeof(uint8_t) );
-            LOGI("ColorImageBuffer. height: %d, width: %d, depth: %d,buffer timestamp %f, and uint8_t size: %zu",color_image_buffer_->width, color_image_buffer_->width, image_depth_,
+            LOGI("Saved example file, timestamp: %f, sizeof: %zu, image size %u ", render_buffer_->timestamp,sizeof(float), std::streamsize(image_width_*image_height_*image_depth_));
+//            LOGI("ColorCameraIntinsics. height: %d, width: %d, depth: %d, and uint8_t size: %zu",image_height_, image_width_, image_depth_,
+//                 sizeof(uint8_t) );
+            LOGI("ColorImageBuffer. height: %d, width: %d, depth: %d,buffer timestamp %f, and uint8_t size: %zu",color_image_buffer_->width, color_image_buffer_->height, image_depth_,
                  color_image_buffer_->timestamp ,sizeof(uint8_t) );
             LOGI("First few values of color_image_buffer_->data are: %u, %u, %u, %u, %u ",color_image_buffer_->data[0],color_image_buffer_->data[220395],color_image_buffer_->data[220405],color_image_buffer_->data[220400],color_image_buffer_->data[230400] );
 //            LOGI("First some values of depth_image_buffer are: %f,%f,%f,%f,%f ",my_depth_image_buffer_[50],my_depth_image_buffer_[220395],my_depth_image_buffer_[220405],my_depth_image_buffer_[220400],my_depth_image_buffer_[230400] );
 
+            if (render_buffer_->color_image == nullptr) {
+                LOGI("No color_image");
+            } else {
+                LOGI("%f", render_buffer_->color_image->timestamp);
+            }
         }
 
         time_buffer_ = depth_timestamp;
