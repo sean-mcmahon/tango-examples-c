@@ -55,6 +55,12 @@ public class MainActivity extends Activity {
   ServiceConnection mTangoServiceConnection = new ServiceConnection() {
       public void onServiceConnected(ComponentName name, IBinder service) {
         JNIInterface.onTangoServiceConnected(service);
+
+        if (!JNIInterface.tangoSetIntrinsicsAndExtrinsics()) {
+          Log.e(TAG, "Failed to set extrinsics and intrinsics.");
+          finish();
+        }
+
         if (!JNIInterface.tangoSetupConfig()) {
           Log.e(TAG, "Failed to set config.");
           finish();
@@ -67,11 +73,6 @@ public class MainActivity extends Activity {
 
         if (!JNIInterface.tangoConnect()) {
           Log.e(TAG, "Failed to set connect service.");
-          finish();
-        }
-
-        if (!JNIInterface.tangoSetIntrinsicsAndExtrinsics()) {
-          Log.e(TAG, "Failed to set extrinsics and intrinsics.");
           finish();
         }
       }
