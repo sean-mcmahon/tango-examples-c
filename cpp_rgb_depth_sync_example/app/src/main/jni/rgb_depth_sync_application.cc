@@ -31,10 +31,20 @@ void OnXYZijAvailableRouter(void* context, const TangoXYZij* xyz_ij) {
   app->OnXYZijAvailable(xyz_ij);
 }
 
+void OnFrameAvailableRouter(void* context, TangoCameraId id, const TangoImageBuffer* buffer) {
+    SynchronizationApplication* app =
+            static_cast<SynchronizationApplication*>(context);
+    app->OnFrameAvailable(buffer);
+}
+
 void SynchronizationApplication::OnXYZijAvailable(const TangoXYZij* xyz_ij) {
   // We'll just update the point cloud associated with our depth image.
   TangoSupport_updatePointCloud(point_cloud_manager_, xyz_ij);
-  //TangoSupport_updateImageBuffer(color_image_manager_, color_image_buffer_);
+}
+
+void SynchronizationApplication::OnFrameAvailable(const TangoImageBuffer* buffer) {
+    // We'll just update the color image.... fuckers
+    TangoSupport_updateImageBuffer(color_image_manager_, buffer);
 }
 
 SynchronizationApplication::SynchronizationApplication()
@@ -98,7 +108,9 @@ bool SynchronizationApplication::TangoSetupConfig() {
   // additional flag "config_enable_depth" to true.
   TangoErrorType err =
       TangoConfig_setBool(tango_config_, "config_enable_depth", true);
-  if (err != TANGO_SUCCESS) {
+    TangoErrorType err2 =
+            TangoConfig_setBool(tango_config_, "config_enable_color_camera", true);
+  if (err != TANGO_SUCCESS || err2 != TANGO_SUCCESS) {
     LOGE("Failed to enable depth.");
     return false;
   }
@@ -151,9 +163,10 @@ bool SynchronizationApplication::TangoSetupConfig() {
                             "camera for intialising image buffer manager.");
             return false;
         } */
-
-        err = TangoSupport_createImageBufferManager(TANGO_HAL_PIXEL_FORMAT_RGBA_8888, image_width_,
+        LOGE("creating bullshit");
+        err = TangoSupport_createImageBufferManager(TANGO_HAL_PIXEL_FORMAT_YCrCb_420_SP, image_width_,
                                                     image_height_, &color_image_manager_);
+        LOGE("created");
         if (err != TANGO_SUCCESS)
         {
             LOGE("SynchronizationApplication: Failed to create image buffer manager.");
@@ -194,7 +207,9 @@ bool SynchronizationApplication::TangoConnectCallbacks() {
   // our poses will be driven by timestamps. As such, we'll use GetPoseAtTime.
   TangoErrorType depth_ret =
       TangoService_connectOnXYZijAvailable(OnXYZijAvailableRouter);
-  return depth_ret == TANGO_SUCCESS;
+    TangoErrorType color_ret =
+            TangoService_connectOnFrameAvailable(TANGO_CAMERA_COLOR, this, OnFrameAvailableRouter);
+  return (depth_ret == TANGO_SUCCESS) && (color_ret == TANGO_SUCCESS);
 }
 
 bool SynchronizationApplication::TangoConnect() {
@@ -257,11 +272,8 @@ void SynchronizationApplication::Render() {
   TangoSupport_getLatestPointCloudAndNewDataFlag(point_cloud_manager_,
                                                  &render_buffer_, &new_points);
     // Get latest colour image manger and buffer.
-    //TangoSupport_updateImageBuffer(color_image_manager_, color_image_buffer_)
-    if (TangoSupport_getLatestImageBufferAndNewDataFlag(color_image_manager_, &color_image_buffer_,&new_pointsTwo)!= TANGO_SUCCESS) {
-        LOGE("ERROR: gettting latest image buffer failure");
-    }
-    LOGI("New points: %d", new_pointsTwo);
+    TangoSupport_getLatestImageBufferAndNewDataFlag(color_image_manager_, &color_image_buffer_,&new_pointsTwo);
+
   depth_timestamp = render_buffer_->timestamp;
   // We need to make sure that we update the texture associated with the color
   // image.
@@ -354,10 +366,10 @@ void SynchronizationApplication::Render() {
             LOGI("First few values of color_image_buffer_->data are: %u, %u, %u, %u, %u ",color_image_buffer_->data[0],color_image_buffer_->data[220395],color_image_buffer_->data[220405],color_image_buffer_->data[220400],color_image_buffer_->data[230400] );
 //            LOGI("First some values of depth_image_buffer are: %f,%f,%f,%f,%f ",my_depth_image_buffer_[50],my_depth_image_buffer_[220395],my_depth_image_buffer_[220405],my_depth_image_buffer_[220400],my_depth_image_buffer_[230400] );
 
-            if (render_buffer_->color_image == nullptr) {
+            if (color_image_buffer_ == nullptr) {
                 LOGI("No color_image");
             } else {
-                LOGI("%f", render_buffer_->color_image->timestamp);
+                LOGI("%f", color_image_buffer_->timestamp);
             }
         }
 

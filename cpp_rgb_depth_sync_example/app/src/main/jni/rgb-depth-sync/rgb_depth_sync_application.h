@@ -119,6 +119,8 @@ class SynchronizationApplication {
   //
   void OnXYZijAvailable(const TangoXYZij* xyz_ij);
 
+  // Color bullshit
+  void OnFrameAvailable(const TangoImageBuffer* buffer);
  private:
   // RGB image
   ColorImage color_image_;
