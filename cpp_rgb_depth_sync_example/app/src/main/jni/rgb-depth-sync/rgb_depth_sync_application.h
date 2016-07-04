@@ -23,6 +23,7 @@
 #include <iostream>
 #include <fstream>
 #include <iomanip>
+#include <string.h>
 
 #include <tango_client_api.h>
 #include <tango_support_api.h>

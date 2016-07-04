@@ -392,19 +392,30 @@ void SynchronizationApplication::Render() {
             }
              */
 
-            uint8_t testUint8 = 128;
             std::vector<float> my_depth_image_buffer_ = depth_image_.getDepthMapBuffer();
+            const int post_status_string_length = 24;
+            char mypose_status_ [post_status_string_length];
+            switch (device_pose_on_image_retreval_.status_code) {
+                case TANGO_POSE_INITIALIZING: strcpy(mypose_status_,"TANGO_POSE_INITIALIZING"); break;
+                case TANGO_POSE_INVALID     : strcpy(mypose_status_,"TANGO_POSE_INVALID-----"); break;
+                case TANGO_POSE_UNKNOWN     : strcpy(mypose_status_,"TANGO_POSE_UNKNOWN-----"); break;
+                case TANGO_POSE_VALID       : strcpy(mypose_status_,"TANGO_POSE_VALID-------"); break;
+                default : strcpy(mypose_status_,"Invalid_status_code----");
+            }
             long unsigned int num_of_pixels_ = sizeof(color_image_buffer_->data); // / sizeof(color_image_buffer_->data[0]);
             if (my_depth_image_buffer_.empty()) {
                 LOGE("SynchronizationApplication::Render - Depth image buffer empty!");
             }
             std::ofstream myfile;
-            myfile.open("/sdcard/Download/pose_estimation.bin");
+            myfile.open("/sdcard/Download/full_pose_estimation.bin");
 //            myfile.write(reinterpret_cast<const char*>(&color_image_buffer_->data[0]), std::streamsize(image_width_*(image_height_+image_height_/2))); // YUV 420 SP format, sizes are height*1.5, width
 //            myfile.write(reinterpret_cast<const char*>(&color_timestamp), sizeof(double));
 //            myfile.write((char*)&(my_depth_image_buffer_[0]),my_depth_image_buffer_.size() *
 //                    sizeof(float));
+            myfile.write(reinterpret_cast<const char*>(&device_pose_on_image_retreval_.accuracy), sizeof(float));
             myfile.write(reinterpret_cast<const char*>(&device_pose_on_image_retreval_.orientation[0]), std::streamsize(4*sizeof(double)));
+            myfile.write(reinterpret_cast<const char*>(&mypose_status_), std::streamsize(sizeof(char)*post_status_string_length));
+            myfile.write(reinterpret_cast<const char*>(&device_pose_on_image_retreval_.timestamp), sizeof(double));
             myfile.write(reinterpret_cast<const char*>(&device_pose_on_image_retreval_.translation[0]), std::streamsize(3*sizeof(double)));
             myfile.close();
             //saving_to_file_=false;
