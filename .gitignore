@@ -13,3 +13,4 @@
 /cpp_rgb_depth_sync_example/app/src/main/libs/*
 /cpp_rgb_depth_sync_example/app/src/main/obj/*
 /cpp_rgb_depth_sync_example/build/*
+cpp_basic_examples/*
