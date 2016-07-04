@@ -426,9 +426,12 @@ void SynchronizationApplication::Render() {
 //                 color_image_buffer_->timestamp ,color_image_buffer_->format);
 //            LOGI("First few values of color_image_buffer_->data are: %u, %u, %u, %u, %u ",color_image_buffer_->data[0],color_image_buffer_->data[220395],
 //                 color_image_buffer_->data[220405],color_image_buffer_->data[220400],color_image_buffer_->data[230400]);//230400] );
+            LOGI("Size of variable types. Float %lu, double %lu , int %lu ", sizeof(float), sizeof(double),
+                 sizeof(int));
             LOGI("Pose_on_color_update Orentation %f, %f, %f, %f. Translation x,y,z %f, %f, %f ", device_pose_on_image_retreval_.orientation[0], device_pose_on_image_retreval_.orientation[1],
             device_pose_on_image_retreval_.orientation[2], device_pose_on_image_retreval_.orientation[3], device_pose_on_image_retreval_.translation[0], device_pose_on_image_retreval_.translation[1],
                  device_pose_on_image_retreval_.translation[2]);
+            LOGI("Pose status: %s, Pose accuracy %f and timestamp %f ",mypose_status_,device_pose_on_image_retreval_.accuracy, device_pose_on_image_retreval_.timestamp);
 //            LOGI("First some values of depth_image_buffer are: %f,%f,%f,%f,%f ",my_depth_image_buffer_[50],my_depth_image_buffer_[220395],my_depth_image_buffer_[220405],my_depth_image_buffer_[220400],my_depth_image_buffer_[230400] );
 
         }
