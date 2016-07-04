@@ -401,6 +401,7 @@ void SynchronizationApplication::Render() {
                 case TANGO_POSE_UNKNOWN     : strcpy(mypose_status_,"TANGO_POSE_UNKNOWN-----"); break;
                 case TANGO_POSE_VALID       : strcpy(mypose_status_,"TANGO_POSE_VALID-------"); break;
                 default : strcpy(mypose_status_,"Invalid_status_code----");
+                    
             }
             long unsigned int num_of_pixels_ = sizeof(color_image_buffer_->data); // / sizeof(color_image_buffer_->data[0]);
             if (my_depth_image_buffer_.empty()) {
