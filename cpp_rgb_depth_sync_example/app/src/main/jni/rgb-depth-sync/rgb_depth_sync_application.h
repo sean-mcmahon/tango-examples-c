@@ -22,6 +22,7 @@
 #include <stdio.h>
 #include <iostream>
 #include <fstream>
+#include <iomanip>
 
 #include <tango_client_api.h>
 #include <tango_support_api.h>
@@ -121,7 +122,11 @@ class SynchronizationApplication {
 
   // Color bullshit
   void OnFrameAvailable(const TangoImageBuffer* buffer);
+
  private:
+
+ void writeCameraIntrinsics2Text(const TangoCameraIntrinsics tango_camera_intrinsics_);
+
   // RGB image
   ColorImage color_image_;
 

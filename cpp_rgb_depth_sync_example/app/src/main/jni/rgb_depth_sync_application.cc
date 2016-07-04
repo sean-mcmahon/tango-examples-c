@@ -20,6 +20,42 @@
 
 namespace rgb_depth_sync {
 
+
+void SynchronizationApplication::writeCameraIntrinsics2Text(const TangoCameraIntrinsics tango_camera_intrinsics_) {
+
+    std::ofstream intrinsicsFile ("/sdcard/Download/Tango_Camera_Intrinsics.txt");
+    if (intrinsicsFile.is_open()) {
+        intrinsicsFile << "calibration_type:\n";
+        switch(tango_camera_intrinsics_.calibration_type) {
+            case TANGO_CALIBRATION_EQUIDISTANT             : intrinsicsFile << "TANGO_CALIBRATION_EQUIDISTANT\n"; break;
+            case TANGO_CALIBRATION_POLYNOMIAL_3_PARAMETERS : intrinsicsFile << "TANGO_CALIBRATION_POLYNOMIAL_3_PARAMETERS\n"; break;
+            default: intrinsicsFile << "Unkown/Invalid\n";
+        }
+        intrinsicsFile << "TangoCameraId:\n";
+        switch(tango_camera_intrinsics_.camera_id) {
+            case TANGO_CAMERA_COLOR   : intrinsicsFile << "TANGO_CAMERA_COLOR\n"; break;
+            case TANGO_CAMERA_RGBIR   : intrinsicsFile << "TANGO_CAMERA_RGBIR\n"; break;
+            case TANGO_CAMERA_FISHEYE : intrinsicsFile << "TANGO_CAMERA_FISHEYE\n"; break;
+            case TANGO_CAMERA_DEPTH   : intrinsicsFile << "TANGO_CAMERA_DEPTH,\n"; break;
+            case TANGO_MAX_CAMERA_ID  : intrinsicsFile << "TANGO_MAX_CAMERA_ID\n"; break;
+            default: intrinsicsFile << "Unkown/Invalid\n";
+        }
+        intrinsicsFile << "cx:\n" <<std::fixed << std::setprecision(8) << tango_camera_intrinsics_.cx << "\n";
+        intrinsicsFile << "cy:\n" <<std::fixed << std::setprecision(8) << tango_camera_intrinsics_.cy << "\n";
+        intrinsicsFile << "distortion:\n";
+        for (int i=0; i < 5; i++) {
+            intrinsicsFile <<std::fixed << std::setprecision(8) << tango_camera_intrinsics_.distortion[i] << ", ";
+        }
+        intrinsicsFile << "\nfx:\n" <<std::fixed << std::setprecision(8) << tango_camera_intrinsics_.fx << "\n";
+        intrinsicsFile << "fy:\n" <<std::fixed << std::setprecision(8) << tango_camera_intrinsics_.fy << "\n";
+        intrinsicsFile << "height:\n" << tango_camera_intrinsics_.height << "\n";
+        intrinsicsFile << "width:\n" << tango_camera_intrinsics_.width;
+
+    }
+    else {
+        LOGE("writeCameraIntrinsics2Text: Could not open Tango_Camera_Intrinsics.txt");
+    }
+}
 // This function will route callbacks to our application object via the context
 // parameter.
 // @param context Will be a pointer to a SynchronizationApplication instance  on
@@ -236,6 +272,8 @@ bool SynchronizationApplication::TangoSetIntrinsicsAndExtrinsics() {
         "camera.");
     return false;
   }
+
+  writeCameraIntrinsics2Text(color_camera_intrinsics);
   image_width_ = color_camera_intrinsics.width;
   image_height_ =  color_camera_intrinsics.height;
   depth_image_.SetCameraIntrinsics(color_camera_intrinsics);
@@ -359,7 +397,7 @@ void SynchronizationApplication::Render() {
 //                    sizeof(float));
             myfile.close();
             //saving_to_file_=false;
-            LOGI("Saved example file, timestamp: %f, sizeof: %zu, image size %d, num of pixels: %lu ", render_buffer_->timestamp,sizeof(float), std::streamsize(image_width_*(image_height_+image_height_/2))),num_of_pixels_);
+            LOGI("Saved example file, timestamp: %f, sizeof: %zu, image size %d, num of pixels: %lu ", render_buffer_->timestamp,sizeof(float), std::streamsize(image_width_*(image_height_+image_height_/2)),num_of_pixels_);
 //            LOGI("ColorCameraIntinsics. height: %d, width: %d, depth: %d, and uint8_t size: %zu",image_height_, image_width_, image_depth_,
 //                 sizeof(uint8_t) );
             LOGI("ColorImageBuffer. height: %d, width: %d, depth: %d,buffer timestamp %f, and Format: %04x (0x11 = YCbCr_420_SP)",color_image_buffer_->width, color_image_buffer_->height, image_depth_,
