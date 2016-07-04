@@ -318,12 +318,9 @@ void SynchronizationApplication::Render() {
     // Get latest colour image manger and buffer.
   TangoSupport_getLatestImageBufferAndNewDataFlag(color_image_manager_, &color_image_buffer_,&new_pointsTwo);
 
-    TangoPoseData device_pose_at_color_image;
-    TangoErrorType myGetPoseError;
-    double color_image_timestamp_ = color_image_buffer_->timestamp;
-    myGetPoseError = TangoService_getPoseAtTime(color_image_buffer_->timestamp, frames_of_reference_, &device_pose_at_color_image);
-    if (myGetPoseError != TANGO_SUCCESS) {
-        LOGE("SynchronizationApplication: Failed to get pose at colour image capture, timestamp %f",color_image_buffer_->timestamp);
+  TangoPoseData device_pose_on_image_retreval_;
+    if (TangoService_getPoseAtTime(color_image_buffer_->timestamp, frames_of_reference_, &device_pose_on_image_retreval_) != TANGO_SUCCESS) {
+        LOGE("SynchronizationApplication: Failed to get pose at colour image capture; timestamp %f",color_image_buffer_->timestamp);
     }
 
   depth_timestamp = render_buffer_->timestamp;
@@ -402,21 +399,25 @@ void SynchronizationApplication::Render() {
                 LOGE("SynchronizationApplication::Render - Depth image buffer empty!");
             }
             std::ofstream myfile;
-            myfile.open("/sdcard/Download/color_image.bin");
-            //myfile.write(reinterpret_cast<const char*>(&testUint8), sizeof(uint8_t));
-            //myfile.write(reinterpret_cast<const char*>(&color_image_buffer_->data[1]), sizeof(uint8_t));
-            myfile.write(reinterpret_cast<const char*>(&color_image_buffer_->data[0]), std::streamsize(image_width_*(image_height_+image_height_/2))); // YUV 420 SP format, sizes are height*1.5, width
+            myfile.open("/sdcard/Download/pose_estimation.bin");
+//            myfile.write(reinterpret_cast<const char*>(&color_image_buffer_->data[0]), std::streamsize(image_width_*(image_height_+image_height_/2))); // YUV 420 SP format, sizes are height*1.5, width
 //            myfile.write(reinterpret_cast<const char*>(&color_timestamp), sizeof(double));
 //            myfile.write((char*)&(my_depth_image_buffer_[0]),my_depth_image_buffer_.size() *
 //                    sizeof(float));
+            myfile.write(reinterpret_cast<const char*>(&device_pose_on_image_retreval_.orientation[0]), std::streamsize(4*sizeof(double)));
+            myfile.write(reinterpret_cast<const char*>(&device_pose_on_image_retreval_.translation[0]), std::streamsize(3*sizeof(double)));
             myfile.close();
             //saving_to_file_=false;
-            LOGI("Saved example file, timestamp: %f, sizeof: %zu, image size %d, num of pixels: %lu ", render_buffer_->timestamp,sizeof(float), std::streamsize(image_width_*(image_height_+image_height_/2)),num_of_pixels_);
+//            LOGI("Saved example file, timestamp: %f, sizeof: %zu, image size %d, num of pixels: %lu ", render_buffer_->timestamp,sizeof(float), std::streamsize(image_width_*(image_height_+image_height_/2)),num_of_pixels_);
 //            LOGI("ColorCameraIntinsics. height: %d, width: %d, depth: %d, and uint8_t size: %zu",image_height_, image_width_, image_depth_,
 //                 sizeof(uint8_t) );
-            LOGI("ColorImageBuffer. height: %d, width: %d, depth: %d,buffer timestamp %f, and Format: %04x (0x11 = YCbCr_420_SP)",color_image_buffer_->width, color_image_buffer_->height, image_depth_,
-                 color_image_buffer_->timestamp ,color_image_buffer_->format);
-            LOGI("First few values of color_image_buffer_->data are: %u, %u, %u, %u, %u ",color_image_buffer_->data[0],color_image_buffer_->data[220395],color_image_buffer_->data[220405],color_image_buffer_->data[220400],color_image_buffer_->data[230400]);//230400] );
+//            LOGI("ColorImageBuffer. height: %d, width: %d, depth: %d,buffer timestamp %f, and Format: %04x (0x11 = YCbCr_420_SP)",color_image_buffer_->width, color_image_buffer_->height, image_depth_,
+//                 color_image_buffer_->timestamp ,color_image_buffer_->format);
+//            LOGI("First few values of color_image_buffer_->data are: %u, %u, %u, %u, %u ",color_image_buffer_->data[0],color_image_buffer_->data[220395],
+//                 color_image_buffer_->data[220405],color_image_buffer_->data[220400],color_image_buffer_->data[230400]);//230400] );
+            LOGI("Pose_on_color_update Orentation %f, %f, %f, %f. Translation x,y,z %f, %f, %f ", device_pose_on_image_retreval_.orientation[0], device_pose_on_image_retreval_.orientation[1],
+            device_pose_on_image_retreval_.orientation[2], device_pose_on_image_retreval_.orientation[3], device_pose_on_image_retreval_.translation[0], device_pose_on_image_retreval_.translation[1],
+                 device_pose_on_image_retreval_.translation[2]);
 //            LOGI("First some values of depth_image_buffer are: %f,%f,%f,%f,%f ",my_depth_image_buffer_[50],my_depth_image_buffer_[220395],my_depth_image_buffer_[220405],my_depth_image_buffer_[220400],my_depth_image_buffer_[230400] );
 
         }
