@@ -382,16 +382,7 @@ void SynchronizationApplication::Render() {
     {
         // Save stuff
         //LOGI("Timestamp: %f with time buffer %f ", depth_timestamp, time_buffer_);
-        if (saving_to_file_ == true && successful_color_image_retreval==true) {
-            /*
-            LOGI("SyncApplication: Saving Stuct to file!");
-            FILE *file = fopen("Test_mSave_File", "wb");
-            if (file != NULL) {
-                fwrite(color_image_buffer_, sizeof(struct TangoSupportImageBufferManager), 1, file);
-                fclose(file);
-            }
-             */
-
+        if (saving_to_file_ == true) {
             std::vector<float> my_depth_image_buffer_ = depth_image_.getDepthMapBuffer();
             const int post_status_string_length = 24;
             char mypose_status_ [post_status_string_length];
@@ -401,13 +392,11 @@ void SynchronizationApplication::Render() {
                 case TANGO_POSE_UNKNOWN     : strcpy(mypose_status_,"TANGO_POSE_UNKNOWN-----"); break;
                 case TANGO_POSE_VALID       : strcpy(mypose_status_,"TANGO_POSE_VALID-------"); break;
                 default : strcpy(mypose_status_,"Invalid_status_code----");
-                    
             }
-            long unsigned int num_of_pixels_ = sizeof(color_image_buffer_->data); // / sizeof(color_image_buffer_->data[0]);
             if (my_depth_image_buffer_.empty()) {
                 LOGE("SynchronizationApplication::Render - Depth image buffer empty!");
             }
-            std::ofstream myfile;
+
             myfile.open("/sdcard/Download/all_variables_one_timestamp.bin");
             myfile.write(reinterpret_cast<const char*>(&color_image_buffer_->data[0]), std::streamsize(image_width_*(image_height_+image_height_/2))); // YUV 420 SP format, sizes are height*1.5, width
             myfile.write(reinterpret_cast<const char*>(&color_image_buffer_->timestamp), sizeof(double));
@@ -418,15 +407,16 @@ void SynchronizationApplication::Render() {
             myfile.write(reinterpret_cast<const char*>(&mypose_status_), std::streamsize(sizeof(char)*post_status_string_length));
             myfile.write(reinterpret_cast<const char*>(&device_pose_on_image_retreval_.timestamp), sizeof(double));
             myfile.write(reinterpret_cast<const char*>(&device_pose_on_image_retreval_.translation[0]), std::streamsize(3*sizeof(double)));
-            myfile.close();
+            num_write_iterations++;
+
             //saving_to_file_=false;
-//            LOGI("Saved example file, timestamp: %f, sizeof: %zu, image size %d, num of pixels: %lu ", render_buffer_->timestamp,sizeof(float), std::streamsize(image_width_*(image_height_+image_height_/2)),num_of_pixels_);
+//            LOGI("Saved example file, timestamp: %f, sizeof: %zu, image size %d", render_buffer_->timestamp,sizeof(float), std::streamsize(image_width_*(image_height_+image_height_/2)));
 //            LOGI("ColorCameraIntinsics. height: %d, width: %d, depth: %d, and uint8_t size: %zu",image_height_, image_width_, image_depth_,
 //                 sizeof(uint8_t) );
             LOGI("ColorImageBuffer. height: %d, width: %d, depth: %d,buffer timestamp %f, and Format: %04x (0x11 = YCbCr_420_SP)",color_image_buffer_->width, color_image_buffer_->height, image_depth_,
                  color_image_buffer_->timestamp ,color_image_buffer_->format);
             LOGI("First few values of color_image_buffer_->data are: %u, %u, %u, %u, %u ",color_image_buffer_->data[0],color_image_buffer_->data[220395],
-                 color_image_buffer_->data[220405],color_image_buffer_->data[220400],color_image_buffer_->data[230400]);//230400] );
+                 color_image_buffer_->data[220405],color_image_buffer_->data[220400],color_image_buffer_->data[230400]); //230400] );
             LOGI("First values of depth_image_buffer are: %f,%f,%f,%f,%f ",my_depth_image_buffer_[50],my_depth_image_buffer_[220395],my_depth_image_buffer_[220405],my_depth_image_buffer_[220400],my_depth_image_buffer_[230400] );
 //            LOGI("Size of variable types. Float %lu, double %lu , int %lu ", sizeof(float), sizeof(double),
 //                 sizeof(int));
@@ -438,6 +428,10 @@ void SynchronizationApplication::Render() {
         }
 
         time_buffer_ = depth_timestamp;
+    }
+    if (num_write_iterations >= 2) {
+        saving_to_file_ = false;
+        myfile.close();
     }
       main_scene_.Render(color_image_.GetTextureId(),
                          depth_image_.GetTextureId());

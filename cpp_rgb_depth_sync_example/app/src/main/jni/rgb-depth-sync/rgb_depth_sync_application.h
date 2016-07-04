@@ -173,6 +173,11 @@ class SynchronizationApplication {
  bool saving_to_file_ = true;
  bool successful_color_image_retreval = false;
 
+ std::ofstream myfile;
+
+ unsigned int num_write_iterations = 0;
+ char my_file_name_[] = "2ts_all_data.bin";
+
   bool gpu_upsample_;
 };
 }  // namespace rgb_depth_sync
