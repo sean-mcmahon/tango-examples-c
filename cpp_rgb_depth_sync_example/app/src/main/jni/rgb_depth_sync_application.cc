@@ -306,11 +306,25 @@ void SynchronizationApplication::Render() {
   double depth_timestamp = 0.0;
   bool new_points = false;
   bool new_pointsTwo = false;
-    double timediff = 0.99;
+  double timediff = 0.99;
+
+  // Sean - Define what motion is requested
+  TangoCoordinateFramePair frames_of_reference_;
+    frames_of_reference_.base = TANGO_COORDINATE_FRAME_START_OF_SERVICE;
+    frames_of_reference_.target = TANGO_COORDINATE_FRAME_DEVICE;
+
   TangoSupport_getLatestPointCloudAndNewDataFlag(point_cloud_manager_,
                                                  &render_buffer_, &new_points);
     // Get latest colour image manger and buffer.
-    TangoSupport_getLatestImageBufferAndNewDataFlag(color_image_manager_, &color_image_buffer_,&new_pointsTwo);
+  TangoSupport_getLatestImageBufferAndNewDataFlag(color_image_manager_, &color_image_buffer_,&new_pointsTwo);
+
+    TangoPoseData device_pose_at_color_image;
+    TangoErrorType myGetPoseError;
+    double color_image_timestamp_ = color_image_buffer_->timestamp;
+    myGetPoseError = TangoService_getPoseAtTime(0.0, frames_of_reference_, &device_pose_at_color_image);
+    if (myGetPoseError != TANGO_SUCCESS) {
+        LOGE("SynchronizationApplication: Failed to get pose at colour image capture, timestamp %f",color_image_buffer_->timestamp);
+    }
 
   depth_timestamp = render_buffer_->timestamp;
   // We need to make sure that we update the texture associated with the color
