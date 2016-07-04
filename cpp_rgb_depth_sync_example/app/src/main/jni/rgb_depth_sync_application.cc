@@ -321,7 +321,7 @@ void SynchronizationApplication::Render() {
     TangoPoseData device_pose_at_color_image;
     TangoErrorType myGetPoseError;
     double color_image_timestamp_ = color_image_buffer_->timestamp;
-    myGetPoseError = TangoService_getPoseAtTime(0.0, frames_of_reference_, &device_pose_at_color_image);
+    myGetPoseError = TangoService_getPoseAtTime(color_image_buffer_->timestamp, frames_of_reference_, &device_pose_at_color_image);
     if (myGetPoseError != TANGO_SUCCESS) {
         LOGE("SynchronizationApplication: Failed to get pose at colour image capture, timestamp %f",color_image_buffer_->timestamp);
     }
