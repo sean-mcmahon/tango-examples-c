@@ -286,6 +286,15 @@ bool SynchronizationApplication::TangoSetIntrinsicsAndExtrinsics() {
 
 void SynchronizationApplication::TangoDisconnect() {
   TangoService_disconnect();
+    if (myfile.is_open) {
+        saving_to_file_ = false;
+        myfile.close();
+        std::ofstream TS_count;
+        TS_count.open("my_file_save_iterations.txt");
+        TS_count << num_write_iterations;
+        TS_count.close();
+        num_write_iterations = 0;
+    }
 }
 
 void SynchronizationApplication::InitializeGLContent() {
@@ -304,7 +313,7 @@ void SynchronizationApplication::SetViewPort(int width, int height) {
 void SynchronizationApplication::Render() {
   double color_timestamp = 0.0;
   double depth_timestamp = 0.0;
-  bool new_points = false;
+  bool new_point_cloud = false;
   bool new_pointsTwo = false;
   double timediff = 0.99;
 
@@ -314,13 +323,28 @@ void SynchronizationApplication::Render() {
     frames_of_reference_.target = TANGO_COORDINATE_FRAME_DEVICE;
 
   TangoSupport_getLatestPointCloudAndNewDataFlag(point_cloud_manager_,
-                                                 &render_buffer_, &new_points);
+                                                 &render_buffer_, &new_point_cloud);
     // Get latest colour image manger and buffer.
   TangoSupport_getLatestImageBufferAndNewDataFlag(color_image_manager_, &color_image_buffer_,&new_pointsTwo);
 
   TangoPoseData device_pose_on_image_retreval_;
-    if (TangoService_getPoseAtTime(color_image_buffer_->timestamp, frames_of_reference_, &device_pose_on_image_retreval_) != TANGO_SUCCESS) {
-        LOGE("SynchronizationApplication: Failed to get pose at colour image capture; timestamp %f",color_image_buffer_->timestamp);
+    /* This is a totally gross way to do this. I should put this somewhere below with the writing of the
+     * data (same if condition). But I dislike the idea of replicating the code down there for each
+     * condition even more.
+     */
+    if (new_point_cloud) { // Pose relative to origin at new PC recording
+        if (TangoService_getPoseAtTime(render_buffer_->timestamp, frames_of_reference_,
+                                       &device_pose_on_image_retreval_) != TANGO_SUCCESS) {
+            LOGE("SynchronizationApplication: Failed to get pose at new point cloud capture; timestamp %f",
+                 render_buffer_->timestamp);
+        }
+    }
+    else { // Pose relative to origin at color image capture
+        if (TangoService_getPoseAtTime(color_image_buffer_->timestamp, frames_of_reference_,
+                                       &device_pose_on_image_retreval_) != TANGO_SUCCESS) {
+            LOGE("SynchronizationApplication: Failed to get pose at colour image capture; timestamp %f",
+                 color_image_buffer_->timestamp);
+        }
     }
 
   depth_timestamp = render_buffer_->timestamp;
@@ -364,7 +388,7 @@ void SynchronizationApplication::Render() {
       if (gpu_upsample_) {
         depth_image_.RenderDepthToTexture(color_image_t1_T_depth_image_t0,
                                           render_buffer_,
-                                          new_points);
+                                          new_point_cloud);
       } else {
         depth_image_.UpdateAndUpsampleDepth(color_image_t1_T_depth_image_t0,
                                             render_buffer_);
@@ -384,6 +408,9 @@ void SynchronizationApplication::Render() {
         //LOGI("Timestamp: %f with time buffer %f ", depth_timestamp, time_buffer_);
         if (saving_to_file_ == true) {
             std::vector<float> my_depth_image_buffer_ = depth_image_.getDepthMapBuffer();
+            if (my_depth_image_buffer_.empty()) {
+                LOGE("SynchronizationApplication::Render - Depth image buffer empty! @ Timestep %f", render_buffer->timestep);
+            }
             const int post_status_string_length = 24;
             char mypose_status_ [post_status_string_length];
             switch (device_pose_on_image_retreval_.status_code) {
@@ -393,38 +420,73 @@ void SynchronizationApplication::Render() {
                 case TANGO_POSE_VALID       : strcpy(mypose_status_,"TANGO_POSE_VALID-------"); break;
                 default : strcpy(mypose_status_,"Invalid_status_code----");
             }
-            if (my_depth_image_buffer_.empty()) {
-                LOGE("SynchronizationApplication::Render - Depth image buffer empty!");
+
+
+            if (new_point_cloud) {
+                myfile.write(reinterpret_cast<const char *>(&render_buffer_->color_image->data[0]),
+                             std::streamsize(image_width_ * (image_height_ + image_height_ /2)));
+                myfile.write(reinterpret_cast<const char *>(&render_buffer_->color_image->timestamp),
+                             sizeof(double));
+                myfile.write((char *) &(my_depth_image_buffer_[0]),
+                             my_depth_image_buffer_.size() * sizeof(float));
+                myfile.write(reinterpret_cast<const char *>(&render_buffer_->timestamp),
+                             sizeof(double));
             }
+            else { // no new point cloud, sync latest color image
+                myfile.write(reinterpret_cast<const char *>(&color_image_buffer_->data[0]),
+                             std::streamsize(image_width_ * (image_height_ + image_height_ /
+                                                                             2))); // YUV 420 SP format, sizes are height*1.5, width
+                myfile.write(reinterpret_cast<const char *>(&color_image_buffer_->timestamp),
+                             sizeof(double));
+                myfile.write((char *) &(my_depth_image_buffer_[0]),
+                             my_depth_image_buffer_.size() * sizeof(float));
+                myfile.write(reinterpret_cast<const char *>(&render_buffer_->timestamp),
+                             sizeof(double));
+                myfile.write(
+                        reinterpret_cast<const char *>(&device_pose_on_image_retreval_.accuracy),
+                        sizeof(float));
+                myfile.write(
+                        reinterpret_cast<const char *>(&device_pose_on_image_retreval_.orientation[0]),
+                        std::streamsize(4 * sizeof(double)));
+                myfile.write(reinterpret_cast<const char *>(&mypose_status_),
+                             std::streamsize(sizeof(char) * post_status_string_length));
+                myfile.write(
+                        reinterpret_cast<const char *>(&device_pose_on_image_retreval_.timestamp),
+                        sizeof(double));
+                myfile.write(
+                        reinterpret_cast<const char *>(&device_pose_on_image_retreval_.translation[0]),
+                        std::streamsize(3 * sizeof(double)));
+                num_write_iterations++;
 
-            myfile.open("/sdcard/Download/all_variables_one_timestamp.bin");
-            myfile.write(reinterpret_cast<const char*>(&color_image_buffer_->data[0]), std::streamsize(image_width_*(image_height_+image_height_/2))); // YUV 420 SP format, sizes are height*1.5, width
-            myfile.write(reinterpret_cast<const char*>(&color_image_buffer_->timestamp), sizeof(double));
-            myfile.write((char*)&(my_depth_image_buffer_[0]),my_depth_image_buffer_.size()*sizeof(float));
-            myfile.write(reinterpret_cast<const char*>(&render_buffer_->timestamp), sizeof(double));
-            myfile.write(reinterpret_cast<const char*>(&device_pose_on_image_retreval_.accuracy), sizeof(float));
-            myfile.write(reinterpret_cast<const char*>(&device_pose_on_image_retreval_.orientation[0]), std::streamsize(4*sizeof(double)));
-            myfile.write(reinterpret_cast<const char*>(&mypose_status_), std::streamsize(sizeof(char)*post_status_string_length));
-            myfile.write(reinterpret_cast<const char*>(&device_pose_on_image_retreval_.timestamp), sizeof(double));
-            myfile.write(reinterpret_cast<const char*>(&device_pose_on_image_retreval_.translation[0]), std::streamsize(3*sizeof(double)));
-            num_write_iterations++;
-
-            //saving_to_file_=false;
+                //saving_to_file_=false;
 //            LOGI("Saved example file, timestamp: %f, sizeof: %zu, image size %d", render_buffer_->timestamp,sizeof(float), std::streamsize(image_width_*(image_height_+image_height_/2)));
 //            LOGI("ColorCameraIntinsics. height: %d, width: %d, depth: %d, and uint8_t size: %zu",image_height_, image_width_, image_depth_,
 //                 sizeof(uint8_t) );
-            LOGI("ColorImageBuffer. height: %d, width: %d, depth: %d,buffer timestamp %f, and Format: %04x (0x11 = YCbCr_420_SP)",color_image_buffer_->width, color_image_buffer_->height, image_depth_,
-                 color_image_buffer_->timestamp ,color_image_buffer_->format);
-            LOGI("First few values of color_image_buffer_->data are: %u, %u, %u, %u, %u ",color_image_buffer_->data[0],color_image_buffer_->data[220395],
-                 color_image_buffer_->data[220405],color_image_buffer_->data[220400],color_image_buffer_->data[230400]); //230400] );
-            LOGI("First values of depth_image_buffer are: %f,%f,%f,%f,%f ",my_depth_image_buffer_[50],my_depth_image_buffer_[220395],my_depth_image_buffer_[220405],my_depth_image_buffer_[220400],my_depth_image_buffer_[230400] );
+                LOGI("ColorImageBuffer. height: %d, width: %d, depth: %d,buffer timestamp %f, and Format: %04x (0x11 = YCbCr_420_SP)",
+                     color_image_buffer_->width, color_image_buffer_->height, image_depth_,
+                     color_image_buffer_->timestamp, color_image_buffer_->format);
+                LOGI("First few values of color_image_buffer_->data are: %u, %u, %u, %u, %u ",
+                     color_image_buffer_->data[0], color_image_buffer_->data[220395],
+                     color_image_buffer_->data[220405], color_image_buffer_->data[220400],
+                     color_image_buffer_->data[230400]); //230400] );
+            }
+                LOGI("First values of depth_image_buffer are: %f,%f,%f,%f,%f ",
+                     my_depth_image_buffer_[50], my_depth_image_buffer_[220395],
+                     my_depth_image_buffer_[220405], my_depth_image_buffer_[220400],
+                     my_depth_image_buffer_[230400]);
 //            LOGI("Size of variable types. Float %lu, double %lu , int %lu ", sizeof(float), sizeof(double),
 //                 sizeof(int));
-            LOGI("Pose_on_color_update Orentation %f, %f, %f, %f. Translation x,y,z %f, %f, %f ", device_pose_on_image_retreval_.orientation[0], device_pose_on_image_retreval_.orientation[1],
-            device_pose_on_image_retreval_.orientation[2], device_pose_on_image_retreval_.orientation[3], device_pose_on_image_retreval_.translation[0], device_pose_on_image_retreval_.translation[1],
-                 device_pose_on_image_retreval_.translation[2]);
-            LOGI("Pose status: %s, Pose accuracy %f and timestamp %f ",mypose_status_,device_pose_on_image_retreval_.accuracy, device_pose_on_image_retreval_.timestamp);
-
+                LOGI("Pose_on_color_update Orentation %f, %f, %f, %f. Translation x,y,z %f, %f, %f ",
+                     device_pose_on_image_retreval_.orientation[0],
+                     device_pose_on_image_retreval_.orientation[1],
+                     device_pose_on_image_retreval_.orientation[2],
+                     device_pose_on_image_retreval_.orientation[3],
+                     device_pose_on_image_retreval_.translation[0],
+                     device_pose_on_image_retreval_.translation[1],
+                     device_pose_on_image_retreval_.translation[2]);
+                LOGI("Pose status: %s, Pose accuracy %f and timestamp %f ", mypose_status_,
+                     device_pose_on_image_retreval_.accuracy,
+                     device_pose_on_image_retreval_.timestamp);
         }
 
         time_buffer_ = depth_timestamp;
@@ -432,6 +494,10 @@ void SynchronizationApplication::Render() {
     if (num_write_iterations >= 2) {
         saving_to_file_ = false;
         myfile.close();
+        std::ofstream TS_count;
+        TS_count.open("my_file_save_iterations.txt");
+        TS_count << num_write_iterations;
+        TS_count.close();
     }
       main_scene_.Render(color_image_.GetTextureId(),
                          depth_image_.GetTextureId());
