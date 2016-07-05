@@ -104,7 +104,7 @@ SynchronizationApplication::~SynchronizationApplication() {
         saving_to_file_ = false;
         myfile.close();
         std::ofstream TS_count;
-        TS_count.open("my_file_save_iterations.txt");
+        TS_count.open("/sdcard/Download/my_file_save_iterations.txt");
         TS_count << num_write_iterations;
         TS_count.close();
         num_write_iterations = 0;
@@ -208,7 +208,7 @@ bool SynchronizationApplication::TangoSetupConfig() {
             return false;
         }
     }
-    myfile.open("2ts_all_data.bin");
+    myfile.open("/sdcard/Download/Two_ts_all_data.bin");
     if (myfile.is_open())
     {
         LOGI("TangoSetUpConfig: Successful opennng of myfile");
@@ -287,7 +287,7 @@ void SynchronizationApplication::TangoDisconnect() {
         saving_to_file_ = false;
         myfile.close();
         std::ofstream TS_count;
-        TS_count.open("my_file_save_iterations.txt");
+        TS_count.open("/sdcard/Download/my_file_save_iterations.txt");
         TS_count << num_write_iterations;
         TS_count.close();
         num_write_iterations = 0;
@@ -519,7 +519,7 @@ void SynchronizationApplication::Render() {
         saving_to_file_ = false;
         myfile.close();
         std::ofstream TS_count;
-        TS_count.open("my_file_save_iterations.txt");
+        TS_count.open("/sdcard/Download/my_file_save_iterations.txt");
         TS_count << num_write_iterations;
         TS_count.close();
     }
