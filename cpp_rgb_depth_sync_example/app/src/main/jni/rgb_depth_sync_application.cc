@@ -156,20 +156,20 @@ bool SynchronizationApplication::TangoSetupConfig() {
     TangoErrorType err2 =
             TangoConfig_setBool(tango_config_, "config_enable_color_camera", true);
   if (err != TANGO_SUCCESS || err2 != TANGO_SUCCESS) {
-    LOGE("Failed to enable depth.");
+    LOGE("Failed to enable depth or color camera.");
     return false;
   }
 
   // We also need to enable the color camera in order to get RGB frame
   // callbacks.
-  err = TangoConfig_setBool(tango_config_, "config_enable_color_camera", true);
-  if (err != TANGO_SUCCESS) {
-    LOGE(
-        "Failed to set 'enable_color_camera' configuration flag with error"
-        " code: %d",
-        err);
-    return false;
-  }
+//  err = TangoConfig_setBool(tango_config_, "config_enable_color_camera", true);
+//  if (err != TANGO_SUCCESS) {
+//    LOGE(
+//        "Failed to set 'enable_color_camera' configuration flag with error"
+//        " code: %d",
+//        err);
+//    return false;
+//  }
 
   // Note that it's super important for AR applications that we enable low
   // latency imu integration so that we have pose information available as
@@ -386,6 +386,12 @@ void SynchronizationApplication::Render() {
     else {
         LOGI("%f", render_buffer_->color_image->timestamp);
         }
+//    if (color_image_buffer_ == nullptr) {
+//        LOGE("No color image buffer");
+//    }
+//    else {
+//        LOGI("%f", color_image_buffer_->timestamp);
+//    }
     //LOGI("Render Buffer Color Image Info timestamp: %f", render_buffer_->color_image->timestamp);
     if ((color_timestamp - time_buffer_ >= timediff)) {
         TangoPoseData device_pose_on_image_retreval_;
@@ -393,19 +399,10 @@ void SynchronizationApplication::Render() {
          * data (same if condition). But I dislike the idea of replicating the code down there for each
          * condition even more.
          */
-        if (new_point_cloud) { // Pose relative to origin at new PC recording
-            if (TangoService_getPoseAtTime(render_buffer_->timestamp, frames_of_reference_,
-                                           &device_pose_on_image_retreval_) != TANGO_SUCCESS) {
-                LOGE("SynchronizationApplication: Failed to get pose at new point cloud capture; timestamp %f",
-                     render_buffer_->timestamp);
-            }
-        }
-        else { // Pose relative to origin at color image capture
-            if (TangoService_getPoseAtTime(color_image_buffer_->timestamp, frames_of_reference_,
-                                           &device_pose_on_image_retreval_) != TANGO_SUCCESS) {
-                LOGE("SynchronizationApplication: Failed to get pose at colour image capture; timestamp %f",
-                     color_image_buffer_->timestamp);
-            }
+        if (TangoService_getPoseAtTime(color_image_buffer_->timestamp, frames_of_reference_,
+                                       &device_pose_on_image_retreval_) != TANGO_SUCCESS) {
+            LOGE("SynchronizationApplication: Failed to get pose at colour image capture; timestamp %f",
+                 color_image_buffer_->timestamp);
         }
 
         // Save stuff
@@ -426,40 +423,7 @@ void SynchronizationApplication::Render() {
                 default : strcpy(mypose_status_,"Invalid_status_code----");
             }
 
-            if (new_point_cloud) {
-                myfile.write(reinterpret_cast<const char *>(&render_buffer_->color_image->data[0]),
-                             std::streamsize(image_width_ * (image_height_ + image_height_ /2)));
-                myfile.write(reinterpret_cast<const char *>(&render_buffer_->color_image->timestamp),
-                             sizeof(double));
-                myfile.write((char *) &(my_depth_image_buffer_[0]),
-                             my_depth_image_buffer_.size() * sizeof(float));
-                myfile.write(reinterpret_cast<const char *>(&render_buffer_->timestamp),
-                             sizeof(double));
-                myfile.write(
-                        reinterpret_cast<const char *>(&device_pose_on_image_retreval_.accuracy),
-                        sizeof(float));
-                myfile.write(
-                        reinterpret_cast<const char *>(&device_pose_on_image_retreval_.orientation[0]),
-                        std::streamsize(4 * sizeof(double)));
-                myfile.write(reinterpret_cast<const char *>(&mypose_status_),
-                             std::streamsize(sizeof(char) * post_status_string_length));
-                myfile.write(
-                        reinterpret_cast<const char *>(&device_pose_on_image_retreval_.timestamp),
-                        sizeof(double));
-                myfile.write(
-                        reinterpret_cast<const char *>(&device_pose_on_image_retreval_.translation[0]),
-                        std::streamsize(3 * sizeof(double)));
-                num_write_iterations++;
-
-                LOGI("RenderBufferColorImage. height: %d, width: %d, depth: %d,buffer timestamp %f, and Format: %04x (0x11 = YCbCr_420_SP)",
-                     render_buffer_->color_image->width, render_buffer_->color_image->height, image_depth_,
-                     render_buffer_->color_image->timestamp, render_buffer_->color_image->format);
-                LOGI("First few values of render_buffer_->color_image->data are: %u, %u, %u, %u, %u ",
-                     render_buffer_->color_image->data[0], render_buffer_->color_image->data[220395],
-                     render_buffer_->color_image->data[220405], render_buffer_->color_image->data[220400],
-                     render_buffer_->color_image->data[230400]); //230400] );
-            }
-            else { // no new point cloud, sync latest color image
+             // no new point cloud, sync latest color image
                 myfile.write(reinterpret_cast<const char *>(&color_image_buffer_->data[0]),
                              std::streamsize(image_width_ * (image_height_ + image_height_ /
                                                                              2))); // YUV 420 SP format, sizes are height*1.5, width
@@ -496,7 +460,6 @@ void SynchronizationApplication::Render() {
                      color_image_buffer_->data[0], color_image_buffer_->data[220395],
                      color_image_buffer_->data[220405], color_image_buffer_->data[220400],
                      color_image_buffer_->data[230400]); //230400] );
-            }
                 LOGI("First values of depth_image_buffer are: %f,%f,%f,%f,%f ",
                      my_depth_image_buffer_[50], my_depth_image_buffer_[220395],
                      my_depth_image_buffer_[220405], my_depth_image_buffer_[220400],
