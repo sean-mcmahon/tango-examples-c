@@ -100,6 +100,15 @@ SynchronizationApplication::~SynchronizationApplication() {
   point_cloud_manager_ = nullptr;
   TangoSupport_freeImageBufferManager(color_image_manager_);
   color_image_manager_ = nullptr;
+    if (myfile.is_open()) {
+        saving_to_file_ = false;
+        myfile.close();
+        std::ofstream TS_count;
+        TS_count.open("my_file_save_iterations.txt");
+        TS_count << num_write_iterations;
+        TS_count.close();
+        num_write_iterations = 0;
+    }
 }
 
 bool SynchronizationApplication::CheckTangoVersion(JNIEnv* env,
@@ -191,23 +200,22 @@ bool SynchronizationApplication::TangoSetupConfig() {
     }
   }
     if (color_image_manager_ == nullptr) {
-        /*TangoErrorType err = TangoService_getCameraIntrinsics(
-                TANGO_CAMERA_COLOR, &color_camera_intrinsics);
-        if (err != TANGO_SUCCESS) {
-            LOGE(
-                    "SynchronizationApplication: Failed to get the intrinsics for the color"
-                            "camera for intialising image buffer manager.");
-            return false;
-        } */
-        LOGE("creating bullshit");
         err = TangoSupport_createImageBufferManager(TANGO_HAL_PIXEL_FORMAT_YCrCb_420_SP, image_width_,
                                                     image_height_, &color_image_manager_);
-        LOGE("created");
         if (err != TANGO_SUCCESS)
         {
             LOGE("SynchronizationApplication: Failed to create image buffer manager.");
             return false;
         }
+    }
+    myfile.open("2ts_all_data.bin");
+    if (myfile.is_open())
+    {
+        LOGI("TangoSetUpConfig: Successful opennng of myfile");
+    }
+    else {
+        LOGE("TangoSetUpConfig: Unsuccessful openning of myfile for data recording");
+        return false;
     }
 
   return true;
@@ -222,17 +230,6 @@ bool SynchronizationApplication::TangoConnectTexture() {
   TangoErrorType err = TangoService_connectTextureId(
       TANGO_CAMERA_COLOR, color_image_.GetTextureId(), this, nullptr);
   return err == TANGO_SUCCESS;
-}
-
-bool SynchronizationApplication::tangoConnectFisheyeTexture() {
-    // The Tango service allows you to connect an OpenGL texture directly to its
-    // RGB and fisheye cameras. This is the most efficient way of receiving
-    // images from the service because it avoids copies. You get access to the
-    // graphic buffer directly. As we're interested in rendering the color image
-    // in our render loop, we'll be polling for the color image as needed.
-    TangoErrorType err = TangoService_connectTextureId(
-            TANGO_CAMERA_FISHEYE, fisheye_image_.GetTextureId(), this, nullptr);
-    return err == TANGO_SUCCESS;
 }
 
 bool SynchronizationApplication::TangoConnectCallbacks() {
@@ -286,7 +283,7 @@ bool SynchronizationApplication::TangoSetIntrinsicsAndExtrinsics() {
 
 void SynchronizationApplication::TangoDisconnect() {
   TangoService_disconnect();
-    if (myfile.is_open) {
+    if (myfile.is_open()) {
         saving_to_file_ = false;
         myfile.close();
         std::ofstream TS_count;
@@ -327,33 +324,13 @@ void SynchronizationApplication::Render() {
     // Get latest colour image manger and buffer.
   TangoSupport_getLatestImageBufferAndNewDataFlag(color_image_manager_, &color_image_buffer_,&new_pointsTwo);
 
-  TangoPoseData device_pose_on_image_retreval_;
-    /* This is a totally gross way to do this. I should put this somewhere below with the writing of the
-     * data (same if condition). But I dislike the idea of replicating the code down there for each
-     * condition even more.
-     */
-    if (new_point_cloud) { // Pose relative to origin at new PC recording
-        if (TangoService_getPoseAtTime(render_buffer_->timestamp, frames_of_reference_,
-                                       &device_pose_on_image_retreval_) != TANGO_SUCCESS) {
-            LOGE("SynchronizationApplication: Failed to get pose at new point cloud capture; timestamp %f",
-                 render_buffer_->timestamp);
-        }
-    }
-    else { // Pose relative to origin at color image capture
-        if (TangoService_getPoseAtTime(color_image_buffer_->timestamp, frames_of_reference_,
-                                       &device_pose_on_image_retreval_) != TANGO_SUCCESS) {
-            LOGE("SynchronizationApplication: Failed to get pose at colour image capture; timestamp %f",
-                 color_image_buffer_->timestamp);
-        }
-    }
-
   depth_timestamp = render_buffer_->timestamp;
   // We need to make sure that we update the texture associated with the color
   // image.
   successful_color_image_retreval = true;
   if (TangoService_updateTexture(TANGO_CAMERA_COLOR, &color_timestamp) !=
       TANGO_SUCCESS) {
-    LOGE("SynchronizationApplication: Failed to get a color image.");
+    LOGE("SynchronizationApplication: Failed to update color image to texture.");
       successful_color_image_retreval = false;
   }
 
@@ -393,6 +370,7 @@ void SynchronizationApplication::Render() {
         depth_image_.UpdateAndUpsampleDepth(color_image_t1_T_depth_image_t0,
                                             render_buffer_);
       }
+
     // Save the colour image (color_image_buffer_ (struct)), depth image
     // color_image_buffer_.depth_map_buffer_ (float vector), point cloud render_buffer_
     // and pose info pose_color_image_t1_T_depth_image_t0.
@@ -402,17 +380,37 @@ void SynchronizationApplication::Render() {
 
     // this isn't technically every second, as depth_timestamp only updates when a new point cloud
     // has been recorded.
-    if (color_timestamp - time_buffer_ >= timediff)
-    {
+    if ((color_timestamp - time_buffer_ >= timediff)) {
+        TangoPoseData device_pose_on_image_retreval_;
+        /* This is a totally gross way to do this. I should put this somewhere below with the writing of the
+         * data (same if condition). But I dislike the idea of replicating the code down there for each
+         * condition even more.
+         */
+        if (new_point_cloud) { // Pose relative to origin at new PC recording
+            if (TangoService_getPoseAtTime(render_buffer_->timestamp, frames_of_reference_,
+                                           &device_pose_on_image_retreval_) != TANGO_SUCCESS) {
+                LOGE("SynchronizationApplication: Failed to get pose at new point cloud capture; timestamp %f",
+                     render_buffer_->timestamp);
+            }
+        }
+        else { // Pose relative to origin at color image capture
+            if (TangoService_getPoseAtTime(color_image_buffer_->timestamp, frames_of_reference_,
+                                           &device_pose_on_image_retreval_) != TANGO_SUCCESS) {
+                LOGE("SynchronizationApplication: Failed to get pose at colour image capture; timestamp %f",
+                     color_image_buffer_->timestamp);
+            }
+        }
+
         // Save stuff
         //LOGI("Timestamp: %f with time buffer %f ", depth_timestamp, time_buffer_);
-        if (saving_to_file_ == true) {
+        if (saving_to_file_ == true && myfile.is_open()) {
             std::vector<float> my_depth_image_buffer_ = depth_image_.getDepthMapBuffer();
             if (my_depth_image_buffer_.empty()) {
-                LOGE("SynchronizationApplication::Render - Depth image buffer empty! @ Timestep %f", render_buffer->timestep);
+                LOGE("SynchronizationApplication::Render - Depth image buffer empty! @ Timestep %f", render_buffer_->timestamp);
             }
             const int post_status_string_length = 24;
             char mypose_status_ [post_status_string_length];
+            // this pose is set on the status of the latest PC being available.
             switch (device_pose_on_image_retreval_.status_code) {
                 case TANGO_POSE_INITIALIZING: strcpy(mypose_status_,"TANGO_POSE_INITIALIZING"); break;
                 case TANGO_POSE_INVALID     : strcpy(mypose_status_,"TANGO_POSE_INVALID-----"); break;
@@ -420,7 +418,6 @@ void SynchronizationApplication::Render() {
                 case TANGO_POSE_VALID       : strcpy(mypose_status_,"TANGO_POSE_VALID-------"); break;
                 default : strcpy(mypose_status_,"Invalid_status_code----");
             }
-
 
             if (new_point_cloud) {
                 myfile.write(reinterpret_cast<const char *>(&render_buffer_->color_image->data[0]),
@@ -431,6 +428,29 @@ void SynchronizationApplication::Render() {
                              my_depth_image_buffer_.size() * sizeof(float));
                 myfile.write(reinterpret_cast<const char *>(&render_buffer_->timestamp),
                              sizeof(double));
+                myfile.write(
+                        reinterpret_cast<const char *>(&device_pose_on_image_retreval_.accuracy),
+                        sizeof(float));
+                myfile.write(
+                        reinterpret_cast<const char *>(&device_pose_on_image_retreval_.orientation[0]),
+                        std::streamsize(4 * sizeof(double)));
+                myfile.write(reinterpret_cast<const char *>(&mypose_status_),
+                             std::streamsize(sizeof(char) * post_status_string_length));
+                myfile.write(
+                        reinterpret_cast<const char *>(&device_pose_on_image_retreval_.timestamp),
+                        sizeof(double));
+                myfile.write(
+                        reinterpret_cast<const char *>(&device_pose_on_image_retreval_.translation[0]),
+                        std::streamsize(3 * sizeof(double)));
+                num_write_iterations++;
+
+                LOGI("RenderBufferColorImage. height: %d, width: %d, depth: %d,buffer timestamp %f, and Format: %04x (0x11 = YCbCr_420_SP)",
+                     render_buffer_->color_image->width, render_buffer_->color_image->height, image_depth_,
+                     render_buffer_->color_image->timestamp, render_buffer_->color_image->format);
+                LOGI("First few values of render_buffer_->color_image->data are: %u, %u, %u, %u, %u ",
+                     render_buffer_->color_image->data[0], render_buffer_->color_image->data[220395],
+                     render_buffer_->color_image->data[220405], render_buffer_->color_image->data[220400],
+                     render_buffer_->color_image->data[230400]); //230400] );
             }
             else { // no new point cloud, sync latest color image
                 myfile.write(reinterpret_cast<const char *>(&color_image_buffer_->data[0]),
@@ -488,9 +508,13 @@ void SynchronizationApplication::Render() {
                      device_pose_on_image_retreval_.accuracy,
                      device_pose_on_image_retreval_.timestamp);
         }
+        else if (!myfile.is_open()) {
+            LOGE("Save file is not open!");
+        }
 
         time_buffer_ = depth_timestamp;
     }
+
     if (num_write_iterations >= 2) {
         saving_to_file_ = false;
         myfile.close();

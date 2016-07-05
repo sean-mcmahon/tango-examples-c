@@ -76,10 +76,6 @@ class SynchronizationApplication {
   // image will be updated to.
   bool TangoConnectTexture();
 
- // Associate the texture generated from an Opengl context to which the fisheye
- // image will be updated to.
- bool tangoConnectFisheyeTexture();
-
   // Sets the callbacks for OnXYZijAvailable
   bool TangoConnectCallbacks();
 
@@ -176,7 +172,7 @@ class SynchronizationApplication {
  std::ofstream myfile;
 
  unsigned int num_write_iterations = 0;
- char my_file_name_[] = "2ts_all_data.bin";
+ //char my_file_name_[] = "2ts_all_data.bin";
 
   bool gpu_upsample_;
 };
