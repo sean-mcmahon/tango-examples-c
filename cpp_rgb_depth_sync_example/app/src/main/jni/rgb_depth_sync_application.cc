@@ -380,6 +380,13 @@ void SynchronizationApplication::Render() {
 
     // this isn't technically every second, as depth_timestamp only updates when a new point cloud
     // has been recorded.
+    if (render_buffer_->color_image == nullptr) {
+        LOGE("No color_image");
+    }
+    else {
+        LOGI("%f", render_buffer_->color_image->timestamp);
+        }
+    //LOGI("Render Buffer Color Image Info timestamp: %f", render_buffer_->color_image->timestamp);
     if ((color_timestamp - time_buffer_ >= timediff)) {
         TangoPoseData device_pose_on_image_retreval_;
         /* This is a totally gross way to do this. I should put this somewhere below with the writing of the
@@ -516,12 +523,16 @@ void SynchronizationApplication::Render() {
     }
 
     if (num_write_iterations >= 2) {
+        LOGI("Closing myfile...");
         saving_to_file_ = false;
         myfile.close();
         std::ofstream TS_count;
         TS_count.open("/sdcard/Download/my_file_save_iterations.txt");
         TS_count << num_write_iterations;
         TS_count.close();
+        if (myfile.is_open()) {
+            LOGE("Unsuccessful close of myfile");
+        }
     }
       main_scene_.Render(color_image_.GetTextureId(),
                          depth_image_.GetTextureId());
