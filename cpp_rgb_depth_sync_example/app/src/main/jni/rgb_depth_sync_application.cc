@@ -353,11 +353,11 @@ void SynchronizationApplication::Render() {
             LOGI("List iterator has reached end of list, reassigning to list.begin(). distance %d", std::distance(color_buffer_list_.begin(), image_list_iterator_));
         }
         std::list<TangoImageBuffer>::const_iterator const_image_list_iterator_ = image_list_iterator_;
-        LOGI("Erasing element... distance %d", std::distance(color_buffer_list_.begin(), const_image_list_iterator_));
-        color_buffer_list_.erase(image_list_iterator_);
+        LOGI("Erasing element... distance %d", std::distance(color_buffer_list_.begin(), image_list_iterator_));
+        color_buffer_list_.erase(const_image_list_iterator_);
         LOGI("erased element at distance %d ; list size %d",std::distance(color_buffer_list_.begin(), image_list_iterator_), color_buffer_list_.size() );
         color_buffer_list_.insert(const_image_list_iterator_,*color_image_buffer_);
-        LOGI("Inserted element at distance %d ; list size %d",std::distance(color_buffer_list_.begin(), const_image_list_iterator_), color_buffer_list_.size() );
+        LOGI("Inserted element at distance %d ; list size %d",std::distance(color_buffer_list_.begin(), image_list_iterator_), color_buffer_list_.size() );
         image_list_iterator_++;
     }
 
