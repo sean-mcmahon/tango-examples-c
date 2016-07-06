@@ -18,7 +18,8 @@
 #define RGB_DEPTH_SYNC_RGB_DEPTH_SYNC_APPLICATION_H_
 
 #include <jni.h>
-#include <vector>
+#include <list>
+#include <iterator>
 #include <stdio.h>
 #include <iostream>
 #include <fstream>
@@ -158,7 +159,8 @@ class SynchronizationApplication {
   // point cloud data which should be rendered.
   TangoXYZij* render_buffer_;
   TangoImageBuffer* color_image_buffer_;
-  std::vector<TangoImageBuffer> color_buffer_vector_;
+  std::list<TangoImageBuffer> color_buffer_list_;
+  std::list<TangoImageBuffer>::iterator image_list_iterator_;
 
  // Image Sizes
  int image_width_;
