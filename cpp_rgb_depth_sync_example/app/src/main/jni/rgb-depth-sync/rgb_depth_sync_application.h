@@ -160,7 +160,7 @@ class SynchronizationApplication {
   TangoXYZij* render_buffer_;
   TangoImageBuffer* color_image_buffer_;
   std::list<TangoImageBuffer> color_buffer_list_;
-  std::list<TangoImageBuffer>::iterator image_list_iterator_ = color_buffer_list_.begin();
+  std::list<TangoImageBuffer>::iterator image_list_iterator_;
 
  // Image Sizes
  int image_width_;

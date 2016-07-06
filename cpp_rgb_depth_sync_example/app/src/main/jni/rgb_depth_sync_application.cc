@@ -341,11 +341,11 @@ void SynchronizationApplication::Render() {
         LOGE("color image buffer is a null pointer!");
     }
 
-//    if (color_buffer_list_.size() <= 4) { // I want 5 elements in my list
-//        color_buffer_list_.push_back(*color_image_buffer_);
-//        LOGI("Push_back on color image list; list size is %d", color_buffer_list_.size());
-//        image_list_iterator_ = color_buffer_list_.begin();
-//    }
+    if (color_buffer_list_.size() <= 4) { // I want 5 elements in my list
+        color_buffer_list_.push_back(*color_image_buffer_);
+        LOGI("Push_back on color image list; list size is %d", color_buffer_list_.size());
+        //image_list_iterator_ = color_buffer_list_.begin();
+    }
 //    else {
 //        LOGI("List reached desired size, using iterator to rease then insert; list size %d", color_buffer_list_.size());
 //        if (image_list_iterator_ == color_buffer_list_.end()) {
