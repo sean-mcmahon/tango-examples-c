@@ -415,11 +415,10 @@ void SynchronizationApplication::Render() {
 //    else {
 //        LOGI("%f", color_image_buffer_->timestamp);
 //    }
-    LOGE("Render buffer TS %f", render_buffer_->timestamp);
-    TangoImageBuffer closest_image = getImageClosestToTS(color_buffer_list_, render_buffer_->timestamp);
-    //LOGI("Render Buffer Color Image Info timestamp: %f", render_buffer_->color_image->timestamp);
+//    LOGI("Render Buffer Color Image Info timestamp: %f", color_image_buffer_->timestamp);
     if ((color_timestamp - time_buffer_ >= timediff)) {
-        // Select Ideal Color Image (closest timestamp to depth image).
+        // Select Ideal Color Image (closest timestamp to depth image).Overwite colo_image_buffer
+        *color_image_buffer_ = getImageClosestToTS(color_buffer_list_, render_buffer_->timestamp);
 
         TangoPoseData device_pose_on_image_retreval_;
         /* This is a totally gross way to do this. I should put this somewhere below with the writing of the
@@ -541,15 +540,15 @@ void SynchronizationApplication::SetGPUUpsample(bool on) { gpu_upsample_ = on; }
 TangoImageBuffer SynchronizationApplication::getImageClosestToTS( std::list<TangoImageBuffer> image_list_, const double depth_timestamp) {
     TangoImageBuffer buffer, closest_image_;
     closest_image_ = image_list_.front();
-    LOGI("Depth timestamp value %f", depth_timestamp);
+//    LOGI("Depth timestamp value %f", depth_timestamp);
     for (std::list<TangoImageBuffer>::iterator myIterator = image_list_.begin(); myIterator!=image_list_.end(); myIterator++ ) {
         buffer = *myIterator;
-        LOGI("Difference is color TS is %f and difference is %f",buffer.timestamp, std::abs(buffer.timestamp - depth_timestamp));
+//        LOGI("Difference is color TS is %f and difference is %f",buffer.timestamp, std::abs(buffer.timestamp - depth_timestamp));
         if (std::abs(buffer.timestamp - depth_timestamp) < std::abs(closest_image_.timestamp - depth_timestamp)) {
             closest_image_ = buffer;
             }
     }
-    LOGI("Closes color image is %f", closest_image_.timestamp);
+//    LOGI("Closes color image is %f", closest_image_.timestamp);
     return closest_image_;
 }
 
