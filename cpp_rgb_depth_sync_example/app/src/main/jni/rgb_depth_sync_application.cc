@@ -284,7 +284,7 @@ bool SynchronizationApplication::TangoSetIntrinsicsAndExtrinsics() {
 
 void SynchronizationApplication::TangoDisconnect() {
   TangoService_disconnect();
-    if (myfile.is_open()) {
+    if (myfile.is_open() && saving_to_file_==true) {
         saving_to_file_ = false;
         myfile.close();
         std::ofstream TS_count;
@@ -313,7 +313,7 @@ void SynchronizationApplication::Render() {
   double depth_timestamp = 0.0;
   bool new_point_cloud = false;
   bool new_pointsTwo = false;
-  double timediff = 0.99;
+  double timediff = 2.99;
 
   // Sean - Define what motion is requested
   TangoCoordinateFramePair frames_of_reference_;
@@ -433,7 +433,7 @@ void SynchronizationApplication::Render() {
 
         // Save stuff
         //LOGI("Timestamp: %f with time buffer %f ", depth_timestamp, time_buffer_);
-        if (saving_to_file_ == true && myfile.is_open()) {
+        if (saving_to_file_ == true && myfile.is_open() && device_pose_on_image_retreval_.status_code==TANGO_POSE_VALID) {
             std::vector<float> my_depth_image_buffer_ = depth_image_.getDepthMapBuffer();
             if (my_depth_image_buffer_.empty()) {
                 LOGE("SynchronizationApplication::Render - Depth image buffer empty! @ Timestep %f", render_buffer_->timestamp);
@@ -504,14 +504,14 @@ void SynchronizationApplication::Render() {
                      device_pose_on_image_retreval_.accuracy,
                      device_pose_on_image_retreval_.timestamp);
         }
-        else if (!myfile.is_open()) {
+        else if (!myfile.is_open() && saving_to_file_==true) {
             LOGE("Save file is not open!");
         }
 
         time_buffer_ = depth_timestamp;
     }
 
-    if (num_write_iterations >= 2) {
+    if (num_write_iterations >= 2 && saving_to_file_==true) {
         LOGI("Closing myfile...");
         saving_to_file_ = false;
         myfile.close();
@@ -521,6 +521,12 @@ void SynchronizationApplication::Render() {
         TS_count.close();
         if (myfile.is_open()) {
             LOGE("Unsuccessful close of myfile");
+        }
+        if (autoReset== true) {
+            LOGE("Re-openning myfile, check filenames");
+            myfile.open("/sdcard/Download/Two_ts_all_data.bin");
+            saving_to_file_ = true;
+            num_write_iterations = 0;
         }
     }
       main_scene_.Render(color_image_.GetTextureId(),
