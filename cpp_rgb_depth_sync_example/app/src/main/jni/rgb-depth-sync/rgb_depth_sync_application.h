@@ -159,8 +159,9 @@ class SynchronizationApplication {
   // point cloud data which should be rendered.
   TangoXYZij* render_buffer_;
   TangoImageBuffer* color_image_buffer_;
-  std::list<TangoImageBuffer> color_buffer_list_;
-  std::list<TangoImageBuffer>::iterator image_list_iterator_;
+  std::list<int> color_buffer_list_;
+  std::list<int>::iterator image_list_iterator_;
+  int testListInteger = 0;
 
  // Image Sizes
  int image_width_;
