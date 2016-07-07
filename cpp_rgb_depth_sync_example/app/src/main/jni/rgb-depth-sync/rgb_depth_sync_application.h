@@ -25,7 +25,7 @@
 #include <fstream>
 #include <iomanip>
 #include <string.h>
-#include <stdlib.h>
+#include <cmath>
 
 #include <tango_client_api.h>
 #include <tango_support_api.h>
