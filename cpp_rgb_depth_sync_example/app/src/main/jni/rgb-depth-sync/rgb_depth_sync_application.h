@@ -25,6 +25,7 @@
 #include <fstream>
 #include <iomanip>
 #include <string.h>
+#include <stdlib.h>
 
 #include <tango_client_api.h>
 #include <tango_support_api.h>
@@ -124,6 +125,8 @@ class SynchronizationApplication {
  private:
 
  void writeCameraIntrinsics2Text(const TangoCameraIntrinsics tango_camera_intrinsics_);
+
+ TangoImageBuffer getImageClosestToTS(const std::list<TangoImageBuffer> image_list_, const double depth_timestamp);
 
   // RGB image
   ColorImage color_image_;

@@ -414,8 +414,11 @@ void SynchronizationApplication::Render() {
 //    else {
 //        LOGI("%f", color_image_buffer_->timestamp);
 //    }
+    TangoImageBuffer closest_image = getImageClosestToTS(color_buffer_list_, render_buffer_->timestamp);
     //LOGI("Render Buffer Color Image Info timestamp: %f", render_buffer_->color_image->timestamp);
     if ((color_timestamp - time_buffer_ >= timediff)) {
+        // Select Ideal Color Image (closest timestamp to depth image).
+
         TangoPoseData device_pose_on_image_retreval_;
         /* This is a totally gross way to do this. I should put this somewhere below with the writing of the
          * data (same if condition). But I dislike the idea of replicating the code down there for each
@@ -532,5 +535,19 @@ void SynchronizationApplication::SetDepthAlphaValue(float alpha) {
 }
 
 void SynchronizationApplication::SetGPUUpsample(bool on) { gpu_upsample_ = on; }
+
+TangoImageBuffer getImageClosestToTS(const std::list<TangoImageBuffer> image_list_, const double depth_timestamp) {
+    TangoImageBuffer buffer, closest_image_;
+    closest_image_ = image_list_.front();
+    for (std::list<TangoImageBuffer>::iterator myIterator = image_list_.begin(); myIterator!=image_list_.end(); myIterator++ ) {
+        buffer = *myIterator;
+        LOGI("Difference is %f",abs(buffer.timestamp - depth_timestamp));
+        if (abs(buffer.timestamp - timestamp) < abs(closest_image_.timestamp - depth_timestamp)) {
+            closest_image_ = buffer;
+        }
+    }
+    LOGI("Closes color image is %f", abs(closest_image_.timestamp - depth_timestamp))
+    return closest_image_;
+}
 
 }  // namespace rgb_depth_sync
