@@ -126,7 +126,7 @@ class SynchronizationApplication {
 
  void writeCameraIntrinsics2Text(const TangoCameraIntrinsics tango_camera_intrinsics_);
 
- TangoImageBuffer getImageClosestToTS(const std::list<TangoImageBuffer> image_list_, const double depth_timestamp);
+ TangoImageBuffer getImageClosestToTS(std::list<TangoImageBuffer> image_list_, const double depth_timestamp);
 
   // RGB image
   ColorImage color_image_;

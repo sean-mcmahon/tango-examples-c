@@ -56,6 +56,21 @@ void SynchronizationApplication::writeCameraIntrinsics2Text(const TangoCameraInt
         LOGE("writeCameraIntrinsics2Text: Could not open Tango_Camera_Intrinsics.txt");
     }
 }
+
+TangoImageBuffer getImageClosestToTS(std::list<TangoImageBuffer> image_list_, const double depth_timestamp) {
+    TangoImageBuffer buffer, closest_image_;
+    closest_image_ = image_list_.front();
+    for (std::list<TangoImageBuffer>::iterator myIterator = image_list_.begin(); myIterator!=image_list_.end(); myIterator++ ) {
+        buffer = *myIterator;
+        LOGI("Difference is %f",abs(buffer.timestamp - depth_timestamp));
+        if (abs(buffer.timestamp - depth_timestamp) < abs(closest_image_.timestamp - depth_timestamp)) {
+            closest_image_ = buffer;
+        }
+    }
+    LOGI("Closes color image is %f", abs(closest_image_.timestamp - depth_timestamp));
+    return closest_image_;
+}
+
 // This function will route callbacks to our application object via the context
 // parameter.
 // @param context Will be a pointer to a SynchronizationApplication instance  on
@@ -536,18 +551,5 @@ void SynchronizationApplication::SetDepthAlphaValue(float alpha) {
 
 void SynchronizationApplication::SetGPUUpsample(bool on) { gpu_upsample_ = on; }
 
-TangoImageBuffer getImageClosestToTS(const std::list<TangoImageBuffer> image_list_, const double depth_timestamp) {
-    TangoImageBuffer buffer, closest_image_;
-    closest_image_ = image_list_.front();
-    for (std::list<TangoImageBuffer>::iterator myIterator = image_list_.begin(); myIterator!=image_list_.end(); myIterator++ ) {
-        buffer = *myIterator;
-        LOGI("Difference is %f",abs(buffer.timestamp - depth_timestamp));
-        if (abs(buffer.timestamp - timestamp) < abs(closest_image_.timestamp - depth_timestamp)) {
-            closest_image_ = buffer;
-        }
-    }
-    LOGI("Closes color image is %f", abs(closest_image_.timestamp - depth_timestamp))
-    return closest_image_;
-}
 
 }  // namespace rgb_depth_sync
