@@ -342,29 +342,26 @@ void SynchronizationApplication::Render() {
     }
 
     if (color_buffer_list_.size() <= 4) { // I want 5 elements in my list
-        color_buffer_list_.push_back(testListInteger);
-        LOGI("Push_back on color image list; list size is %d, int value is %d", color_buffer_list_.size(), testListInteger);
+        color_buffer_list_.push_back(*color_image_buffer_);
+//        LOGI("Push_back on color image list; list size is %d", color_buffer_list_.size());
         image_list_iterator_ = color_buffer_list_.begin();
     }
     else {
-        LOGI("List elements are:");
-        for (std::list<int>::iterator testIterator =color_buffer_list_.begin(); testIterator!=color_buffer_list_.end(); testIterator++ ) {
-            LOGI("- %d,",*testIterator);
-        }
-       // LOGI("List reached desired size, using iterator to rease then insert; list size %d", color_buffer_list_.size());
+//        LOGI("List elements are:");
+//        for (std::list<int>::iterator testIterator =color_buffer_list_.begin(); testIterator!=color_buffer_list_.end(); testIterator++ ) {
+//            LOGI("-: %d,",(*testIterator).timestamp);
+//        }
         if (image_list_iterator_ == color_buffer_list_.end()) {
             image_list_iterator_ = color_buffer_list_.begin();
-            LOGI("List iterator has reached end of list, reassigning to list.begin(). distance %d", std::distance(color_buffer_list_.begin(), image_list_iterator_));
+//            LOGI("List iterator has reached end of list, reassigning to list.begin(). distance %d", std::distance(color_buffer_list_.begin(), image_list_iterator_));
         }
-//        std::list<TangoImageBuffer>::const_iterator const_image_list_iterator_ = image_list_iterator_;
-        LOGI("Erasing element %d ... distance %d", *image_list_iterator_,std::distance(color_buffer_list_.begin(), image_list_iterator_));
+//        LOGI("Erasing element... distance %d", std::distance(color_buffer_list_.begin(), image_list_iterator_));
         image_list_iterator_ = color_buffer_list_.erase(image_list_iterator_);
-        LOGI("erased element %d at distance %d ; list size %d",*image_list_iterator_,std::distance(color_buffer_list_.begin(), image_list_iterator_), color_buffer_list_.size() );
-        color_buffer_list_.insert(image_list_iterator_,testListInteger);
-        LOGI("Inserted element %d at distance %d ; list size %d",*image_list_iterator_,std::distance(color_buffer_list_.begin(), image_list_iterator_), color_buffer_list_.size() );
+//        LOGI("erased element at distance %d ; list size %d",std::distance(color_buffer_list_.begin(), image_list_iterator_), color_buffer_list_.size() );
+        color_buffer_list_.insert(image_list_iterator_,*color_image_buffer_);
+//        LOGI("Inserted element at distance %d ; list size %d",std::distance(color_buffer_list_.begin(), image_list_iterator_), color_buffer_list_.size() );
 //        image_list_iterator_++;
     }
-    testListInteger++;
 
   // Calculate the relative pose from color camera frame at timestamp
   // color_timestamp t1 and depth
