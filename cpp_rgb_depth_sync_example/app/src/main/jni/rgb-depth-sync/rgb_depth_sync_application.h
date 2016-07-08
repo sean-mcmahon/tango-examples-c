@@ -172,7 +172,7 @@ class SynchronizationApplication {
 
  // Used to save data every x seconds
  double time_buffer_ = 0.0;
- bool saving_to_file_ = true;
+ bool saving_to_file_ = false;
  bool successful_color_image_retreval = false;
  const bool autoReset = false;
 

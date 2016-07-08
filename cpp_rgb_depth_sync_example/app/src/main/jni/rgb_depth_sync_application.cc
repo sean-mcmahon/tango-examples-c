@@ -241,8 +241,8 @@ bool SynchronizationApplication::TangoConnectCallbacks() {
   // our poses will be driven by timestamps. As such, we'll use GetPoseAtTime.
   TangoErrorType depth_ret =
       TangoService_connectOnXYZijAvailable(OnXYZijAvailableRouter);
-    TangoErrorType color_ret =
-            TangoService_connectOnFrameAvailable(TANGO_CAMERA_COLOR, this, OnFrameAvailableRouter);
+  TangoErrorType color_ret =
+      TangoService_connectOnFrameAvailable(TANGO_CAMERA_COLOR, this, OnFrameAvailableRouter);
   return (depth_ret == TANGO_SUCCESS) && (color_ret == TANGO_SUCCESS);
 }
 
@@ -313,7 +313,7 @@ void SynchronizationApplication::Render() {
   double depth_timestamp = 0.0;
   bool new_point_cloud = false;
   bool new_pointsTwo = false;
-  double timediff = 2.99;
+  double timediff = 0.99;
 
   // Sean - Define what motion is requested
   TangoCoordinateFramePair frames_of_reference_;
@@ -322,8 +322,7 @@ void SynchronizationApplication::Render() {
 
   TangoSupport_getLatestPointCloudAndNewDataFlag(point_cloud_manager_,
                                                  &render_buffer_, &new_point_cloud);
-    // Get latest colour image manger and buffer.
-  TangoSupport_getLatestImageBufferAndNewDataFlag(color_image_manager_, &color_image_buffer_,&new_pointsTwo);
+
 
   depth_timestamp = render_buffer_->timestamp;
   // We need to make sure that we update the texture associated with the color
@@ -335,6 +334,8 @@ void SynchronizationApplication::Render() {
       successful_color_image_retreval = false;
   }
 
+    // Get latest colour image manger and buffer.
+    TangoSupport_getLatestImageBufferAndNewDataFlag(color_image_manager_, &color_image_buffer_,&new_pointsTwo);
 
   // In the following code, we define t0 as the depth timestamp and t1 as the
   // color camera timestamp.
@@ -342,7 +343,7 @@ void SynchronizationApplication::Render() {
         LOGE("color image buffer is a null pointer!");
     }
 
-    if (color_buffer_list_.size() <= 4) { // I want 5 elements in my list
+    if (color_buffer_list_.size() <= 10) { // I want 5 elements in my list
         color_buffer_list_.push_back(*color_image_buffer_);
 //        LOGI("Push_back on color image list; list size is %d", color_buffer_list_.size());
         image_list_iterator_ = color_buffer_list_.begin();
@@ -554,7 +555,7 @@ TangoImageBuffer SynchronizationApplication::getImageClosestToTS( std::list<Tang
             closest_image_ = buffer;
             }
     }
-//    LOGI("Closes color image is %f", closest_image_.timestamp);
+    LOGI("Closes color image is %f, with diff %f", closest_image_.timestamp, std::abs(closest_image_.timestamp - depth_timestamp));
     return closest_image_;
 }
 
