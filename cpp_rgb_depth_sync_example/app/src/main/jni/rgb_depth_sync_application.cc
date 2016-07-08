@@ -209,7 +209,7 @@ bool SynchronizationApplication::TangoSetupConfig() {
             return false;
         }
     }
-    myfile.open("/sdcard/Download/Two_ts_all_data.bin");
+    myfile.open("/sdcard/Download/many_ts_all_data.bin");
     if (myfile.is_open())
     {
         LOGI("TangoSetUpConfig: Successful opennng of myfile");
@@ -283,7 +283,6 @@ bool SynchronizationApplication::TangoSetIntrinsicsAndExtrinsics() {
 }
 
 void SynchronizationApplication::TangoDisconnect() {
-  TangoService_disconnect();
     if (myfile.is_open() && saving_to_file_==true) {
         saving_to_file_ = false;
         myfile.close();
@@ -292,7 +291,9 @@ void SynchronizationApplication::TangoDisconnect() {
         TS_count << num_write_iterations;
         TS_count.close();
         num_write_iterations = 0;
+        LOGE("Closed myfile");
     }
+    TangoService_disconnect();
 }
 
 void SynchronizationApplication::InitializeGLContent() {
@@ -313,7 +314,7 @@ void SynchronizationApplication::Render() {
   double depth_timestamp = 0.0;
   bool new_point_cloud = false;
   bool new_pointsTwo = false;
-  double timediff = 0.99;
+  double timediff = 0.19;
 
   // Sean - Define what motion is requested
   TangoCoordinateFramePair frames_of_reference_;
@@ -343,7 +344,7 @@ void SynchronizationApplication::Render() {
         LOGE("color image buffer is a null pointer!");
     }
 
-    if (color_buffer_list_.size() <= 10) { // I want 5 elements in my list
+    if (color_buffer_list_.size() <= 10) { // I want 10 elements in my list
         color_buffer_list_.push_back(*color_image_buffer_);
 //        LOGI("Push_back on color image list; list size is %d", color_buffer_list_.size());
         image_list_iterator_ = color_buffer_list_.begin();
@@ -417,7 +418,9 @@ void SynchronizationApplication::Render() {
 //        LOGI("%f", color_image_buffer_->timestamp);
 //    }
 //    LOGI("Render Buffer Color Image Info timestamp: %f", color_image_buffer_->timestamp);
+//    LOGE("Color timestamp %f . Time Buffer %f", color_timestamp, time_buffer_);
     if ((color_timestamp - time_buffer_ >= timediff)) {
+        LOGE("---------------- Begin saving data! ---------------- %f ", color_timestamp);
         // Select Ideal Color Image (closest timestamp to depth image).Overwite colo_image_buffer
         *color_image_buffer_ = getImageClosestToTS(color_buffer_list_, render_buffer_->timestamp);
 
@@ -434,7 +437,7 @@ void SynchronizationApplication::Render() {
 
         // Save stuff
         //LOGI("Timestamp: %f with time buffer %f ", depth_timestamp, time_buffer_);
-        if (saving_to_file_ == true && myfile.is_open() && device_pose_on_image_retreval_.status_code==TANGO_POSE_VALID) {
+        if (saving_to_file_ == true && myfile.is_open() && device_pose_on_image_retreval_.status_code!=TANGO_POSE_INITIALIZING) {
             std::vector<float> my_depth_image_buffer_ = depth_image_.getDepthMapBuffer();
             if (my_depth_image_buffer_.empty()) {
                 LOGE("SynchronizationApplication::Render - Depth image buffer empty! @ Timestep %f", render_buffer_->timestamp);
@@ -474,45 +477,56 @@ void SynchronizationApplication::Render() {
                 myfile.write(
                         reinterpret_cast<const char *>(&device_pose_on_image_retreval_.translation[0]),
                         std::streamsize(3 * sizeof(double)));
+            if ((num_write_iterations % 4)==0) {
+                myfile.flush();
+                LOGI("Flushed!");
+            }
+            LOGE("Saved data iteration %d", num_write_iterations+1 );
                 num_write_iterations++;
+
 
                 //saving_to_file_=false;
 //            LOGI("Saved example file, timestamp: %f, sizeof: %zu, image size %d", render_buffer_->timestamp,sizeof(float), std::streamsize(image_width_*(image_height_+image_height_/2)));
 //            LOGI("ColorCameraIntinsics. height: %d, width: %d, depth: %d, and uint8_t size: %zu",image_height_, image_width_, image_depth_,
 //                 sizeof(uint8_t) );
-                LOGI("ColorImageBuffer. height: %d, width: %d, depth: %d,buffer timestamp %f, and Format: %04x (0x11 = YCbCr_420_SP)",
-                     color_image_buffer_->width, color_image_buffer_->height, image_depth_,
-                     color_image_buffer_->timestamp, color_image_buffer_->format);
-                LOGI("First few values of color_image_buffer_->data are: %u, %u, %u, %u, %u ",
-                     color_image_buffer_->data[0], color_image_buffer_->data[220395],
-                     color_image_buffer_->data[220405], color_image_buffer_->data[220400],
-                     color_image_buffer_->data[230400]); //230400] );
-                LOGI("First values of depth_image_buffer are: %f,%f,%f,%f,%f ",
-                     my_depth_image_buffer_[50], my_depth_image_buffer_[220395],
-                     my_depth_image_buffer_[220405], my_depth_image_buffer_[220400],
-                     my_depth_image_buffer_[230400]);
-//            LOGI("Size of variable types. Float %lu, double %lu , int %lu ", sizeof(float), sizeof(double),
-//                 sizeof(int));
-                LOGI("Pose_on_color_update Orentation %f, %f, %f, %f. Translation x,y,z %f, %f, %f ",
-                     device_pose_on_image_retreval_.orientation[0],
-                     device_pose_on_image_retreval_.orientation[1],
-                     device_pose_on_image_retreval_.orientation[2],
-                     device_pose_on_image_retreval_.orientation[3],
-                     device_pose_on_image_retreval_.translation[0],
-                     device_pose_on_image_retreval_.translation[1],
-                     device_pose_on_image_retreval_.translation[2]);
-                LOGI("Pose status: %s, Pose accuracy %f and timestamp %f ", mypose_status_,
-                     device_pose_on_image_retreval_.accuracy,
-                     device_pose_on_image_retreval_.timestamp);
+//                LOGI("ColorImageBuffer. height: %d, width: %d, depth: %d,buffer timestamp %f, and Format: %04x (0x11 = YCbCr_420_SP)",
+//                     color_image_buffer_->width, color_image_buffer_->height, image_depth_,
+//                     color_image_buffer_->timestamp, color_image_buffer_->format);
+//                LOGI("First few values of color_image_buffer_->data are: %u, %u, %u, %u, %u ",
+//                     color_image_buffer_->data[0], color_image_buffer_->data[220395],
+//                     color_image_buffer_->data[220405], color_image_buffer_->data[220400],
+//                     color_image_buffer_->data[230400]); //230400] );
+//                LOGI("First values of depth_image_buffer are: %f,%f,%f,%f,%f ",
+//                     my_depth_image_buffer_[50], my_depth_image_buffer_[220395],
+//                     my_depth_image_buffer_[220405], my_depth_image_buffer_[220400],
+//                     my_depth_image_buffer_[230400]);
+////            LOGI("Size of variable types. Float %lu, double %lu , int %lu ", sizeof(float), sizeof(double),
+////                 sizeof(int));
+//                LOGI("Pose_on_color_update Orentation %f, %f, %f, %f. Translation x,y,z %f, %f, %f ",
+//                     device_pose_on_image_retreval_.orientation[0],
+//                     device_pose_on_image_retreval_.orientation[1],
+//                     device_pose_on_image_retreval_.orientation[2],
+//                     device_pose_on_image_retreval_.orientation[3],
+//                     device_pose_on_image_retreval_.translation[0],
+//                     device_pose_on_image_retreval_.translation[1],
+//                     device_pose_on_image_retreval_.translation[2]);
+//                LOGI("Pose status: %s, Pose accuracy %f and timestamp %f ", mypose_status_,
+//                     device_pose_on_image_retreval_.accuracy,
+//                     device_pose_on_image_retreval_.timestamp);
         }
         else if (!myfile.is_open() && saving_to_file_==true) {
             LOGE("Save file is not open!");
         }
+        else {
+            if (saving_to_file_==true) {
+                LOGE("Not saving!");
+            }
+        }
 
-        time_buffer_ = depth_timestamp;
+        time_buffer_ = color_timestamp;
     }
 
-    if (num_write_iterations >= 2 && saving_to_file_==true) {
+    if (num_write_iterations >= max_save_iterations && saving_to_file_==true) {
         LOGI("Closing myfile...");
         saving_to_file_ = false;
         myfile.close();
@@ -525,9 +539,12 @@ void SynchronizationApplication::Render() {
         }
         if (autoReset== true) {
             LOGE("Re-openning myfile, check filenames");
-            myfile.open("/sdcard/Download/Two_ts_all_data.bin");
+            myfile.open("/sdcard/Download/many_ts_all_data.bin");
             saving_to_file_ = true;
             num_write_iterations = 0;
+        }
+        else {
+            LOGE("Save Complete.");
         }
     }
       main_scene_.Render(color_image_.GetTextureId(),
@@ -555,7 +572,7 @@ TangoImageBuffer SynchronizationApplication::getImageClosestToTS( std::list<Tang
             closest_image_ = buffer;
             }
     }
-    LOGI("Closes color image is %f, with diff %f", closest_image_.timestamp, std::abs(closest_image_.timestamp - depth_timestamp));
+//    LOGI("Closes color image is %f, with diff %f", closest_image_.timestamp, std::abs(closest_image_.timestamp - depth_timestamp));
     return closest_image_;
 }
 

@@ -172,13 +172,15 @@ class SynchronizationApplication {
 
  // Used to save data every x seconds
  double time_buffer_ = 0.0;
- bool saving_to_file_ = false;
+ bool saving_to_file_ = true;
  bool successful_color_image_retreval = false;
  const bool autoReset = false;
+// char binary_save_name[] = "/sdcard/Download/Two_ts_all_data.bin";
 
  std::ofstream myfile;
 
  unsigned int num_write_iterations = 0;
+ const int max_save_iterations = 100;
  //char my_file_name_[] = "2ts_all_data.bin";
 
   bool gpu_upsample_;
