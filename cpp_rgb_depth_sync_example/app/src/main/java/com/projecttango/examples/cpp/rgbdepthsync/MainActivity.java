@@ -49,6 +49,7 @@ public class MainActivity extends Activity {
   private SeekBar mDepthOverlaySeekbar;
   private CheckBox mdebugOverlayCheckbox;
   private CheckBox mGPUUpsampleCheckbox;
+  private CheckBox mDataRecordingCheckbox;
 
     
   // Tango Service connection.
@@ -121,6 +122,13 @@ public class MainActivity extends Activity {
     }
   }
 
+  private class DataRecordingListener implements CheckBox.OnCheckedChangeListener {
+    @Override
+    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+      JNIInterface.SetDataRecording(isChecked);
+    }
+  }
+
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
@@ -130,7 +138,7 @@ public class MainActivity extends Activity {
     display.getSize(size);
 
     getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
-                         WindowManager.LayoutParams.FLAG_FULLSCREEN);
+            WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
     setContentView(R.layout.activity_main);
 
@@ -143,6 +151,9 @@ public class MainActivity extends Activity {
 
     mGPUUpsampleCheckbox = (CheckBox) findViewById(R.id.gpu_upsample_checkbox);
     mGPUUpsampleCheckbox.setOnCheckedChangeListener(new GPUUpsampleListener());
+
+    mDataRecordingCheckbox = (CheckBox) findViewById(R.id.data_recording_checkbox);
+    mDataRecordingCheckbox.setOnCheckedChangeListener( new DataRecordingListener());
 
     // OpenGL view where all of the graphics are drawn
     mGLView = (GLSurfaceView) findViewById(R.id.gl_surface_view);
