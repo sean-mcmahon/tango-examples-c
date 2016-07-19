@@ -30,9 +30,11 @@ import android.view.WindowManager;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.SeekBar;
+import android.widget.TextView;
 import android.widget.Toast;
-import java.util.Timer;
-import java.util.TimerTask;
+import android.os.Handler;
+import android.os.Handler.Callback;
+import android.os.Message;
 
 import com.projecttango.examples.cpp.util.TangoInitializationHelper;
 
@@ -44,6 +46,7 @@ public class MainActivity extends Activity {
 
   // The minimum Tango Core version required from this application.
   private static final int MIN_TANGO_CORE_VERSION = 9377;
+  long starttime = 0;
 
   private GLSurfaceRenderer mRenderer;
   private GLSurfaceView mGLView;
@@ -53,7 +56,42 @@ public class MainActivity extends Activity {
   private CheckBox mGPUUpsampleCheckbox;
   private CheckBox mDataRecordingCheckbox;
 
-    
+  // Timer initialisation stuff
+  TextView mtext;
+//  final Handler h = new Handler(new Callback() {
+//
+//    @Override
+//    public boolean handleMessage(Message msg) {
+//      long millis = System.currentTimeMillis() - starttime;
+//      int seconds = (int) (millis / 1000);
+//      int minutes = seconds / 60;
+//      seconds     = seconds % 60;
+//
+//      mtext.setText(String.format("%d:%02d", minutes, seconds));
+//      return false;
+//    }
+//  });
+  Handler h2 = new Handler();
+  Runnable run = new Runnable() {
+
+    @Override
+    public void run() {
+      long millis = System.currentTimeMillis() - starttime;
+      int seconds = (int) (millis / 1000);
+      int minutes = seconds / 60;
+      seconds     = seconds % 60;
+
+      mtext.setText(String.format("%d:%02d", minutes, seconds));
+
+      if (seconds >=2) {
+        // Cancel recording
+        mDataRecordingCheckbox.setChecked(false);
+      }
+
+      h2.postDelayed(this, 500);
+    }
+  };
+
   // Tango Service connection.
   ServiceConnection mTangoServiceConnection = new ServiceConnection() {
       public void onServiceConnected(ComponentName name, IBinder service) {
@@ -130,10 +168,13 @@ public class MainActivity extends Activity {
       JNIInterface.SetDataRecording(isChecked);
       if (isChecked) {
         // start runable
-        h.postDelayed(run, 0);
+        starttime = System.currentTimeMillis();
+        h2.postDelayed(run, 0);
       }
       else {
-        h.removeCallbacks(run);
+        starttime = 0;
+        h2.removeCallbacks(run);
+        mtext.setText(String.format("Not Recording"));
       }
     }
   }
@@ -152,7 +193,7 @@ public class MainActivity extends Activity {
     setContentView(R.layout.activity_main);
 
     // Set my timer stuff
-    
+    mtext = (TextView)findViewById(R.id.data_recording_textview);
 
     mDepthOverlaySeekbar = (SeekBar) findViewById(R.id.depth_overlay_alpha_seekbar);
     mDepthOverlaySeekbar.setOnSeekBarChangeListener(new DepthOverlaySeekbarListener());
@@ -199,6 +240,7 @@ public class MainActivity extends Activity {
     mGLView.onPause();
     JNIInterface.tangoDisconnect();
     unbindService(mTangoServiceConnection);
+    h2.removeCallbacks(run);
   }
 
   public void surfaceCreated() {

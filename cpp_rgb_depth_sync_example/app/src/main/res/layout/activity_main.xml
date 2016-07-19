@@ -48,11 +48,14 @@
         android:layout_alignParentEnd="true"
         android:checked="false"
         android:layout_margin="2dp" />
+
     <TextView
-        android:layout_width="250dp"
+        android:id="@+id/data_recording_textview"
+        android:layout_width="300dp"
         android:layout_height="wrap_content"
-        android:text="0:00"
-        android:textColor="@android:"
+        android:text="Not Recording"
+        android:textColor="@android:color/holo_red_dark"
         android:layout_above="@id/data_recording_checkbox"
-        android:layout_alignParentEnd="true"/>
+        android:layout_alignParentEnd="true"
+        android:textSize="24dp" />
 </RelativeLayout>
