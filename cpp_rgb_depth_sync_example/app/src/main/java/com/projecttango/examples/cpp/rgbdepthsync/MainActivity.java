@@ -83,12 +83,14 @@ public class MainActivity extends Activity {
 
       mtext.setText(String.format("%d:%02d", minutes, seconds));
 
-      if (seconds >=2) {
+      if (minutes >=30) {
         // Cancel recording
         mDataRecordingCheckbox.setChecked(false);
+        h2.removeCallbacks(this);
       }
-
-      h2.postDelayed(this, 500);
+      else {
+        h2.postDelayed(this, 500);
+      }
     }
   };
 
