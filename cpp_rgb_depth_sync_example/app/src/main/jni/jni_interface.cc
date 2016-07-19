@@ -103,6 +103,18 @@ Java_com_projecttango_examples_cpp_rgbdepthsync_JNIInterface_setGPUUpsample(
   return app.SetGPUUpsample(on);
 }
 
+JNIEXPORT void JNICALL
+Java_com_projecttango_examples_cpp_rgbdepthsync_JNIInterface_SetDataRecording(
+        JNIEnv*, jobject, jboolean on) {
+return app.SetDataRecording(on);
+}
+
+JNIEXPORT jboolean JNICALL
+Java_com_projecttango_examples_cpp_rgbdepthsync_JNIInterface_getDataRecordingStatus(
+        JNIEnv*, jobject) {
+    return app.getDataRecordingStatus();
+}
+
 #ifdef __cplusplus
 }
 #endif

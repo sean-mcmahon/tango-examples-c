@@ -113,6 +113,9 @@ class SynchronizationApplication {
   // Set whether to use GPU or CPU upsampling
   void SetGPUUpsample(bool on);
 
+ // using button to activate recording.
+ void SetDataRecording(bool on);
+
   // Callback for point clouds that come in from the Tango service.
   //
   // @param xyz_ij The point cloud returned by the service.
@@ -121,6 +124,8 @@ class SynchronizationApplication {
 
   // Color bullshit
   void OnFrameAvailable(const TangoImageBuffer* buffer);
+
+bool getDataRecordingStatus();
 
  private:
 
@@ -172,7 +177,7 @@ class SynchronizationApplication {
 
  // Used to save data every x seconds
  double time_buffer_ = 0.0;
- bool saving_to_file_ = true;
+ bool saving_to_file_ = false;
  bool successful_color_image_retreval = false;
  const bool autoReset = false;
 // char binary_save_name[] = "/sdcard/Download/Two_ts_all_data.bin";

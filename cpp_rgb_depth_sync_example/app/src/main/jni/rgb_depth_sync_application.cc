@@ -477,7 +477,7 @@ void SynchronizationApplication::Render() {
                 myfile.write(
                         reinterpret_cast<const char *>(&device_pose_on_image_retreval_.translation[0]),
                         std::streamsize(3 * sizeof(double)));
-            if ((num_write_iterations % 4)==0) {
+            if ((num_write_iterations % 2)==0) {
                 myfile.flush();
                 LOGI("Flushed!");
             }
@@ -519,8 +519,12 @@ void SynchronizationApplication::Render() {
         }
         else {
             if (saving_to_file_==true) {
-                LOGE("Not saving!");
+                LOGE("Not saving! Pose is probably still intialising");
             }
+            else {
+                LOGI("saving_to_file_ set to false, not saving.");
+            }
+
         }
 
         time_buffer_ = color_timestamp;
@@ -560,6 +564,10 @@ void SynchronizationApplication::SetDepthAlphaValue(float alpha) {
 }
 
 void SynchronizationApplication::SetGPUUpsample(bool on) { gpu_upsample_ = on; }
+
+void SynchronizationApplication::SetDataRecording(bool on) { saving_to_file_ = on; }
+
+bool SynchronizationApplication::getDataRecordingStatus() { return saving_to_file_; }
 
 TangoImageBuffer SynchronizationApplication::getImageClosestToTS( std::list<TangoImageBuffer> image_list_, const double depth_timestamp) {
     TangoImageBuffer buffer, closest_image_;
