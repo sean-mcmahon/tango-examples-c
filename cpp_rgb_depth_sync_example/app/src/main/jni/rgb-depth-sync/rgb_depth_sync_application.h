@@ -187,10 +187,9 @@ void getCurrentTimeAsString(char * char_timestr_);
 
  std::ofstream myfile;
 
- unsigned int num_write_iterations = 0;
  const int max_save_iterations = 100;
  static const int length_file_name_ = 40;
-
+ unsigned int num_write_iterations = 0;
  char my_file_name_[length_file_name_];
 
   bool gpu_upsample_;

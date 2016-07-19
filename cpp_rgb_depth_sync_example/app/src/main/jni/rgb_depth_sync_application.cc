@@ -119,11 +119,6 @@ SynchronizationApplication::~SynchronizationApplication() {
     if (myfile.is_open()) {
         saving_to_file_ = false;
         myfile.close();
-        std::ofstream TS_count;
-        TS_count.open("/sdcard/Download/my_file_save_iterations.txt");
-        TS_count << num_write_iterations;
-        TS_count.close();
-        num_write_iterations = 0;
     }
 }
 
@@ -291,12 +286,7 @@ void SynchronizationApplication::TangoDisconnect() {
     if (myfile.is_open() && saving_to_file_==true) {
         saving_to_file_ = false;
         myfile.close();
-        std::ofstream TS_count;
-        TS_count.open("/sdcard/Download/my_file_save_iterations.txt");
-        TS_count << num_write_iterations;
-        TS_count.close();
-        num_write_iterations = 0;
-        LOGE("Closed myfile");
+        LOGE("Closed myfile, %s ", my_file_name_);
     }
     TangoService_disconnect();
 }
@@ -531,10 +521,6 @@ void SynchronizationApplication::Render() {
                 if (myfile.is_open()) {
                     LOGI("Closing file %s ...", my_file_name_);
                     myfile.close();
-                    std::ofstream TS_count;
-                    TS_count.open("/sdcard/Download/my_file_save_iterations.txt");
-                    TS_count << num_write_iterations;
-                    TS_count.close();
                 }
             }
 
@@ -547,10 +533,6 @@ void SynchronizationApplication::Render() {
 //        LOGI("Closing myfile...");
 //        saving_to_file_ = false;
 //        myfile.close();
-//        std::ofstream TS_count;
-//        TS_count.open("/sdcard/Download/my_file_save_iterations.txt");
-//        TS_count << num_write_iterations;
-//        TS_count.close();
 //        if (myfile.is_open()) {
 //            LOGE("Unsuccessful close of myfile");
 //        }
