@@ -83,7 +83,8 @@ public class MainActivity extends Activity {
 
       mtext.setText(String.format("%d:%02d", minutes, seconds));
 
-      if (minutes >=30) {
+      // limit recording time and make sure that the check box matches c++ flag
+      if (minutes >=30 || !JNIInterface.getDataRecordingStatus()) {
         // Cancel recording
         mDataRecordingCheckbox.setChecked(false);
         h2.removeCallbacks(this);

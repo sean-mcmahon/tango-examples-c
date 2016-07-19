@@ -20,6 +20,15 @@
 
 namespace rgb_depth_sync {
 
+void SynchronizationApplication::getCurrentTimeAsString(char * char_buffer) {
+    time_t rawtime;
+    struct tm * timeinfo;
+
+    time (&rawtime);
+    timeinfo = localtime(&rawtime);
+
+    strftime(char_buffer,100,"%d-%m-%Y %I:%M:%S",timeinfo);
+}
 
 void SynchronizationApplication::writeCameraIntrinsics2Text(const TangoCameraIntrinsics tango_camera_intrinsics_) {
 
@@ -209,6 +218,8 @@ bool SynchronizationApplication::TangoSetupConfig() {
             return false;
         }
     }
+    getCurrentTimeAsString(&my_file_name_);
+    LOGE("Printing out char array for filename %s", my_file_name_);
     myfile.open("/sdcard/Download/many_ts_all_data.bin");
     if (myfile.is_open())
     {
@@ -530,27 +541,27 @@ void SynchronizationApplication::Render() {
         time_buffer_ = color_timestamp;
     }
 
-    if (num_write_iterations >= max_save_iterations && saving_to_file_==true) {
-        LOGI("Closing myfile...");
-        saving_to_file_ = false;
-        myfile.close();
-        std::ofstream TS_count;
-        TS_count.open("/sdcard/Download/my_file_save_iterations.txt");
-        TS_count << num_write_iterations;
-        TS_count.close();
-        if (myfile.is_open()) {
-            LOGE("Unsuccessful close of myfile");
-        }
-        if (autoReset== true) {
-            LOGE("Re-openning myfile, check filenames");
-            myfile.open("/sdcard/Download/many_ts_all_data.bin");
-            saving_to_file_ = true;
-            num_write_iterations = 0;
-        }
-        else {
-            LOGE("Save Complete.");
-        }
-    }
+//    if (num_write_iterations >= max_save_iterations && saving_to_file_==true) {
+//        LOGI("Closing myfile...");
+//        saving_to_file_ = false;
+//        myfile.close();
+//        std::ofstream TS_count;
+//        TS_count.open("/sdcard/Download/my_file_save_iterations.txt");
+//        TS_count << num_write_iterations;
+//        TS_count.close();
+//        if (myfile.is_open()) {
+//            LOGE("Unsuccessful close of myfile");
+//        }
+//        if (autoReset== true) {
+//            LOGE("Re-openning myfile, check filenames");
+//            myfile.open("/sdcard/Download/many_ts_all_data.bin");
+//            saving_to_file_ = true;
+//            num_write_iterations = 0;
+//        }
+//        else {
+//            LOGE("Save Complete.");
+//        }
+//    }
       main_scene_.Render(color_image_.GetTextureId(),
                          depth_image_.GetTextureId());
 }

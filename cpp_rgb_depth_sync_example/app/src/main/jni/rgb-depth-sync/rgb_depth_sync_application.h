@@ -35,6 +35,7 @@
 #include <rgb-depth-sync/scene.h>
 #include <rgb-depth-sync/util.h>
 #include <tango-gl/util.h>
+#include <ctime>
 
 namespace rgb_depth_sync {
 
@@ -131,6 +132,8 @@ bool getDataRecordingStatus();
 
  void writeCameraIntrinsics2Text(const TangoCameraIntrinsics tango_camera_intrinsics_);
 
+void getCurrentTimeAsString(char * char_buffer);
+
  TangoImageBuffer getImageClosestToTS(std::list<TangoImageBuffer> image_list_, const double depth_timestamp);
 
   // RGB image
@@ -186,7 +189,7 @@ bool getDataRecordingStatus();
 
  unsigned int num_write_iterations = 0;
  const int max_save_iterations = 100;
- //char my_file_name_[] = "2ts_all_data.bin";
+ char my_file_name_[100];
 
   bool gpu_upsample_;
 };
