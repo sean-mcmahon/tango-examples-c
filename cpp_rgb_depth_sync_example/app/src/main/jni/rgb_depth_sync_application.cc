@@ -20,14 +20,20 @@
 
 namespace rgb_depth_sync {
 
-void SynchronizationApplication::getCurrentTimeAsString(char * char_buffer) {
+void SynchronizationApplication::getCurrentTimeAsString(char * char_timestr_) {
+//    char char_buffer[length_file_name_];
     time_t rawtime;
     struct tm * timeinfo;
 
     time (&rawtime);
     timeinfo = localtime(&rawtime);
 
-    strftime(char_buffer,100,"%d-%m-%Y %I:%M:%S",timeinfo);
+    strftime(char_timestr_,length_file_name_,"/sdcard/Download/%d-%m-%Y_%I:%M:%S.bin",timeinfo);
+//    LOGE("Date is %s ?", char_buffer);
+//
+//    for (int i=0; i<length_file_name_; ++i) {
+//        char_timestr_[i] = char_buffer[i];
+//    }
 }
 
 void SynchronizationApplication::writeCameraIntrinsics2Text(const TangoCameraIntrinsics tango_camera_intrinsics_) {
@@ -218,18 +224,6 @@ bool SynchronizationApplication::TangoSetupConfig() {
             return false;
         }
     }
-    getCurrentTimeAsString(&my_file_name_);
-    LOGE("Printing out char array for filename %s", my_file_name_);
-    myfile.open("/sdcard/Download/many_ts_all_data.bin");
-    if (myfile.is_open())
-    {
-        LOGI("TangoSetUpConfig: Successful opennng of myfile");
-    }
-    else {
-        LOGE("TangoSetUpConfig: Unsuccessful openning of myfile for data recording");
-        return false;
-    }
-
   return true;
 }
 
@@ -526,14 +520,22 @@ void SynchronizationApplication::Render() {
 //                     device_pose_on_image_retreval_.timestamp);
         }
         else if (!myfile.is_open() && saving_to_file_==true) {
-            LOGE("Save file is not open!");
+            LOGE("Trying to save but, outfile is not open!");
         }
         else {
             if (saving_to_file_==true) {
-                LOGE("Not saving! Pose is probably still intialising");
+                LOGE("File open and saving data but nothing written; pose is probably still intialising");
             }
             else {
                 LOGI("saving_to_file_ set to false, not saving.");
+                if (myfile.is_open()) {
+                    LOGI("Closing file %s ...", my_file_name_);
+                    myfile.close();
+                    std::ofstream TS_count;
+                    TS_count.open("/sdcard/Download/my_file_save_iterations.txt");
+                    TS_count << num_write_iterations;
+                    TS_count.close();
+                }
             }
 
         }
@@ -576,7 +578,23 @@ void SynchronizationApplication::SetDepthAlphaValue(float alpha) {
 
 void SynchronizationApplication::SetGPUUpsample(bool on) { gpu_upsample_ = on; }
 
-void SynchronizationApplication::SetDataRecording(bool on) { saving_to_file_ = on; }
+void SynchronizationApplication::SetDataRecording(bool on) {
+    saving_to_file_ = on;
+
+    if (saving_to_file_) {
+        getCurrentTimeAsString(my_file_name_);
+        LOGE("Printing out filename %s", my_file_name_);
+        myfile.open(my_file_name_);
+        if (myfile.is_open())
+        {
+            LOGI("SynchronizationApplication::SetDataRecording Successful opennng of myfile");
+        }
+        else {
+            LOGE("SynchronizationApplication::SetDataRecording Unsuccessful openning of myfile for data recording");
+            saving_to_file_ = false;
+        }
+    }
+}
 
 bool SynchronizationApplication::getDataRecordingStatus() { return saving_to_file_; }
 

@@ -88,6 +88,8 @@ public class MainActivity extends Activity {
         // Cancel recording
         mDataRecordingCheckbox.setChecked(false);
         h2.removeCallbacks(this);
+//        Toast.makeText(getActivity(), "Recording cancelled.",
+//          Toast.LENGTH_LONG).show();
       }
       else {
         h2.postDelayed(this, 500);

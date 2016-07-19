@@ -132,7 +132,7 @@ bool getDataRecordingStatus();
 
  void writeCameraIntrinsics2Text(const TangoCameraIntrinsics tango_camera_intrinsics_);
 
-void getCurrentTimeAsString(char * char_buffer);
+void getCurrentTimeAsString(char * char_timestr_);
 
  TangoImageBuffer getImageClosestToTS(std::list<TangoImageBuffer> image_list_, const double depth_timestamp);
 
@@ -189,7 +189,9 @@ void getCurrentTimeAsString(char * char_buffer);
 
  unsigned int num_write_iterations = 0;
  const int max_save_iterations = 100;
- char my_file_name_[100];
+ static const int length_file_name_ = 40;
+
+ char my_file_name_[length_file_name_];
 
   bool gpu_upsample_;
 };
