@@ -31,6 +31,8 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.SeekBar;
 import android.widget.Toast;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import com.projecttango.examples.cpp.util.TangoInitializationHelper;
 
@@ -126,6 +128,13 @@ public class MainActivity extends Activity {
     @Override
     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
       JNIInterface.SetDataRecording(isChecked);
+      if (isChecked) {
+        // start runable
+        h.postDelayed(run, 0);
+      }
+      else {
+        h.removeCallbacks(run);
+      }
     }
   }
 
@@ -141,6 +150,9 @@ public class MainActivity extends Activity {
             WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
     setContentView(R.layout.activity_main);
+
+    // Set my timer stuff
+    
 
     mDepthOverlaySeekbar = (SeekBar) findViewById(R.id.depth_overlay_alpha_seekbar);
     mDepthOverlaySeekbar.setOnSeekBarChangeListener(new DepthOverlaySeekbarListener());
