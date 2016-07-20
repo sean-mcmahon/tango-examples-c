@@ -27,8 +27,14 @@ void SynchronizationApplication::getCurrentTimeAsString(char * char_timestr_) {
 
     time (&rawtime);
     timeinfo = localtime(&rawtime);
-
-    strftime(char_timestr_,length_file_name_,"/sdcard/Download/%d-%m-%Y_%I-%M-%S.bin",timeinfo);
+    if (save_fisheye_images) {
+        strftime(char_timestr_, length_file_name_, "/sdcard/Download/%d-%m-%Y_%I-%M-%S_plusFisheye.bin",
+                 timeinfo);
+    }
+    else {
+        strftime(char_timestr_, length_file_name_, "/sdcard/Download/%d-%m-%Y_%I-%M-%S_minuFisheye.bin",
+                 timeinfo);
+    }
 //    LOGE("Date is %s ?", char_buffer);
 //
 //    for (int i=0; i<length_file_name_; ++i) {
@@ -183,7 +189,7 @@ bool SynchronizationApplication::TangoSetupConfig() {
             TangoConfig_setBool(tango_config_, "config_enable_color_camera", true);
 
     TangoErrorType err3 =
-            TangoConfig_setBool(tango_config_, "config_enable_fisheye_camera", true);
+            TangoConfig_setBool(tango_config_, "config_enable_motion_tracking", true);
   if (err != TANGO_SUCCESS || err2 != TANGO_SUCCESS) {
     LOGE("Failed to enable depth or color camera.");
     return false;
@@ -357,6 +363,7 @@ void SynchronizationApplication::Render() {
   double depth_timestamp = 0.0;
   bool new_point_cloud = false;
   bool new_pointsTwo = false;
+  bool new_fishy_points = false;
   double timediff = 0.19;
 
   // Sean - Define what motion is requested
@@ -378,8 +385,14 @@ void SynchronizationApplication::Render() {
       successful_color_image_retreval = false;
   }
 
-    // Get latest colour image manger and buffer.
+    // Get latest colour image from manger and write to buffer.
     TangoSupport_getLatestImageBufferAndNewDataFlag(color_image_manager_, &color_image_buffer_,&new_pointsTwo);
+
+    // Get update buffer to latest fisheye image
+    if (TangoSupport_getLatestImageBufferAndNewDataFlag(fisheye_image_manager_, &fisheye_image_buffer_,&new_fishy_points)
+        != TANGO_SUCCESS) {
+        LOGE("Could not update fisheye image buffer from manager");
+    }
 
   // In the following code, we define t0 as the depth timestamp and t1 as the
   // color camera timestamp.
@@ -520,6 +533,13 @@ void SynchronizationApplication::Render() {
                 myfile.write(
                         reinterpret_cast<const char *>(&device_pose_on_image_retreval_.translation[0]),
                         std::streamsize(3 * sizeof(double)));
+            if (save_fisheye_images) {
+                myfile.write(reinterpret_cast<const char *>(&fisheye_image_buffer_->data[0]),
+                         std::streamsize(fisheye_image_width_ * (fisheye_image_height_ + fisheye_image_height_ /
+                                                                         2))); // YUV 420 SP format, sizes are height*1.5, width
+                myfile.write(reinterpret_cast<const char *>(&fisheye_image_buffer_->timestamp),
+                             sizeof(double));
+            }
             if ((num_write_iterations % 2)==0) {
                 myfile.flush();
                 LOGI("Flushed!");
@@ -529,7 +549,7 @@ void SynchronizationApplication::Render() {
 
 
                 //saving_to_file_=false;
-//            LOGI("Saved example file, timestamp: %f, sizeof: %zu, image size %d", render_buffer_->timestamp,sizeof(float), std::streamsize(image_width_*(image_height_+image_height_/2)));
+            LOGI("Saved example file, color timestamp: %f, fisheye timestamp %f, difference %f", color_image_buffer_->timestamp, fisheye_image_buffer_->timestamp, std::abs(fisheye_image_buffer_->timestamp - color_image_buffer_->timestamp));
 //            LOGI("ColorCameraIntinsics. height: %d, width: %d, depth: %d, and uint8_t size: %zu",image_height_, image_width_, image_depth_,
 //                 sizeof(uint8_t) );
 //                LOGI("ColorImageBuffer. height: %d, width: %d, depth: %d,buffer timestamp %f, and Format: %04x (0x11 = YCbCr_420_SP)",

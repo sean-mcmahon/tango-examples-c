@@ -195,12 +195,13 @@ void getCurrentTimeAsString(char * char_timestr_);
  bool saving_to_file_ = false;
  bool successful_color_image_retreval = false;
  const bool autoReset = false;
+ const bool save_fisheye_images = true;
 // char binary_save_name[] = "/sdcard/Download/Two_ts_all_data.bin";
 
  std::ofstream myfile;
 
  const int max_save_iterations = 100;
- static const int length_file_name_ = 40;
+ static const int length_file_name_ = 52;
  unsigned int num_write_iterations = 0;
  char my_file_name_[length_file_name_];
 
