@@ -106,9 +106,9 @@ void SynchronizationApplication::OnFrameAvailable(const TangoImageBuffer* buffer
     TangoSupport_updateImageBuffer(color_image_manager_, buffer);
 }
 
-void SynchronizationApplication::OnFisheyeFrameAvailable(const TangoImageBuffer* buffer) {
+void SynchronizationApplication::OnFisheyeFrameAvailable(const TangoImageBuffer* fishy_buffer) {
     // We'll just update the fisheye image.... eat shit
-    TangoSupport_updateImageBuffer(fisheye_image_manager_, buffer);
+    TangoSupport_updateImageBuffer(fisheye_image_manager_, fishy_buffer);
 }
 
 SynchronizationApplication::SynchronizationApplication()
@@ -128,6 +128,9 @@ SynchronizationApplication::~SynchronizationApplication() {
   point_cloud_manager_ = nullptr;
   TangoSupport_freeImageBufferManager(color_image_manager_);
   color_image_manager_ = nullptr;
+  TangoSupport_freeImageBufferManager(fisheye_image_manager_);
+  fisheye_image_manager_ = nullptr;
+
     if (myfile.is_open()) {
         saving_to_file_ = false;
         myfile.close();
@@ -178,9 +181,16 @@ bool SynchronizationApplication::TangoSetupConfig() {
       TangoConfig_setBool(tango_config_, "config_enable_depth", true);
     TangoErrorType err2 =
             TangoConfig_setBool(tango_config_, "config_enable_color_camera", true);
+
+    TangoErrorType err3 =
+            TangoConfig_setBool(tango_config_, "config_enable_fisheye_camera", true);
   if (err != TANGO_SUCCESS || err2 != TANGO_SUCCESS) {
     LOGE("Failed to enable depth or color camera.");
     return false;
+  }
+  if (err3 !=TANGO_SUCCESS) {
+      LOGE("Failed to connect to Fisheye camera.");
+      return false;
   }
 
   // We also need to enable the color camera in order to get RGB frame
@@ -228,6 +238,16 @@ bool SynchronizationApplication::TangoSetupConfig() {
         if (err != TANGO_SUCCESS)
         {
             LOGE("SynchronizationApplication: Failed to create image buffer manager.");
+            return false;
+        }
+    }
+    if (fisheye_image_manager_ == nullptr) {
+        LOGE("Filling fisheye_image_manager_");
+        err = TangoSupport_createImageBufferManager(TANGO_HAL_PIXEL_FORMAT_YCrCb_420_SP, fisheye_image_width_,
+                                                    fisheye_image_height_, &fisheye_image_manager_);
+        if (err != TANGO_SUCCESS)
+        {
+            LOGE("SynchronizationApplication: Failed to create fisheye buffer manager.");
             return false;
         }
     }
@@ -295,10 +315,13 @@ bool SynchronizationApplication::TangoSetIntrinsicsAndExtrinsics() {
     return false;
   }
   writeCameraIntrinsics2Text(fisheye_camera_intrinsics, "Fisheye");
+  fisheye_image_width_ = fisheye_camera_intrinsics.width;
+  fisheye_image_height_ = fisheye_camera_intrinsics.height;
 
   writeCameraIntrinsics2Text(color_camera_intrinsics, "Color");
   image_width_ = color_camera_intrinsics.width;
   image_height_ =  color_camera_intrinsics.height;
+
   depth_image_.SetCameraIntrinsics(color_camera_intrinsics);
   main_scene_.SetCameraIntrinsics(color_camera_intrinsics);
 

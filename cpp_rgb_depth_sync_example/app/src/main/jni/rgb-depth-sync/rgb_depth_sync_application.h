@@ -126,7 +126,7 @@ class SynchronizationApplication {
   // Color bullshit
   void OnFrameAvailable(const TangoImageBuffer* buffer);
  // fisheye callback
-  void OnFisheyeFrameAvailable(const TangoImageBuffer* buffer);
+  void OnFisheyeFrameAvailable(const TangoImageBuffer* fishy_buffer);
 
 
 
@@ -181,10 +181,14 @@ void getCurrentTimeAsString(char * char_timestr_);
   std::list<TangoImageBuffer> color_buffer_list_;
   std::list<TangoImageBuffer>::iterator image_list_iterator_;
 
- // Image Sizes
+ // Color Image Sizes
  int image_width_;
  int image_height_;
  const int image_depth_ = 3;
+
+ // Fisheye Image Sizes
+ int fisheye_image_width_;
+ int fisheye_image_height_;
 
  // Used to save data every x seconds
  double time_buffer_ = 0.0;
