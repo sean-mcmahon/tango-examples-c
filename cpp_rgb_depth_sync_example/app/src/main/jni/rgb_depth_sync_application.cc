@@ -560,6 +560,10 @@ void SynchronizationApplication::Render() {
 //                     color_image_buffer_->data[0], color_image_buffer_->data[220395],
 //                     color_image_buffer_->data[220405], color_image_buffer_->data[220400],
 //                     color_image_buffer_->data[230400]); //230400] );
+            LOGI("First few values of fisheye_image_buffer->data are: %u, %u, %u, %u, %u ",
+                 fisheye_image_buffer_->data[0], fisheye_image_buffer_->data[500],
+                 fisheye_image_buffer_->data[20720], fisheye_image_buffer_->data[307198],
+                 fisheye_image_buffer_->data[307220]); //230400] );
 //                LOGI("First values of depth_image_buffer are: %f,%f,%f,%f,%f ",
 //                     my_depth_image_buffer_[50], my_depth_image_buffer_[220395],
 //                     my_depth_image_buffer_[220405], my_depth_image_buffer_[220400],
@@ -579,7 +583,7 @@ void SynchronizationApplication::Render() {
 //                     device_pose_on_image_retreval_.timestamp);
         }
         else if (!myfile.is_open() && saving_to_file_==true) {
-            LOGE("Trying to save but, outfile is not open!");
+            LOGE("Trying to save but outfile is not open!");
         }
         else {
             if (saving_to_file_==true) {
@@ -592,7 +596,6 @@ void SynchronizationApplication::Render() {
                     myfile.close();
                 }
             }
-
         }
 
         time_buffer_ = color_timestamp;
