@@ -549,7 +549,8 @@ void SynchronizationApplication::Render() {
 
 
                 //saving_to_file_=false;
-            LOGI("Saved example file, color timestamp: %f, fisheye timestamp %f, difference %f", color_image_buffer_->timestamp, fisheye_image_buffer_->timestamp, std::abs(fisheye_image_buffer_->timestamp - color_image_buffer_->timestamp));
+            LOGI("Saved example file, color timestamp: %f, fisheye timestamp %f, difference %f. ", color_image_buffer_->timestamp, fisheye_image_buffer_->timestamp, std::abs(fisheye_image_buffer_->timestamp - color_image_buffer_->timestamp));
+//            LOGI("Fisheye format %04x (0x11 = YCbCr_420_SP)",fisheye_image_buffer_->format);
 //            LOGI("ColorCameraIntinsics. height: %d, width: %d, depth: %d, and uint8_t size: %zu",image_height_, image_width_, image_depth_,
 //                 sizeof(uint8_t) );
 //                LOGI("ColorImageBuffer. height: %d, width: %d, depth: %d,buffer timestamp %f, and Format: %04x (0x11 = YCbCr_420_SP)",
