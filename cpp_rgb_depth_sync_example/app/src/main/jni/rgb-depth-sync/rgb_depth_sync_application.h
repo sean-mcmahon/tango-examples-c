@@ -125,12 +125,16 @@ class SynchronizationApplication {
 
   // Color bullshit
   void OnFrameAvailable(const TangoImageBuffer* buffer);
+ // fisheye callback
+  void OnFisheyeFrameAvailable(const TangoImageBuffer* buffer);
+
+
 
 bool getDataRecordingStatus();
 
  private:
 
- void writeCameraIntrinsics2Text(const TangoCameraIntrinsics tango_camera_intrinsics_);
+ void writeCameraIntrinsics2Text(const TangoCameraIntrinsics tango_camera_intrinsics_, std::string camera_type);
 
 void getCurrentTimeAsString(char * char_timestr_);
 
@@ -166,10 +170,14 @@ void getCurrentTimeAsString(char * char_timestr_);
  // color image data
   TangoSupportImageBufferManager* color_image_manager_;
 
+// hopefully this works
+ TangoSupportImageBufferManager* fisheye_image_manager_;
+
   // This TangoXYZij* points to the most recently produced
   // point cloud data which should be rendered.
   TangoXYZij* render_buffer_;
   TangoImageBuffer* color_image_buffer_;
+  TangoImageBuffer* fisheye_image_buffer_;
   std::list<TangoImageBuffer> color_buffer_list_;
   std::list<TangoImageBuffer>::iterator image_list_iterator_;
 

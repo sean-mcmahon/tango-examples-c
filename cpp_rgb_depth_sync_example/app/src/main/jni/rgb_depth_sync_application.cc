@@ -28,7 +28,7 @@ void SynchronizationApplication::getCurrentTimeAsString(char * char_timestr_) {
     time (&rawtime);
     timeinfo = localtime(&rawtime);
 
-    strftime(char_timestr_,length_file_name_,"/sdcard/Download/%d-%m-%Y_%I:%M:%S.bin",timeinfo);
+    strftime(char_timestr_,length_file_name_,"/sdcard/Download/%d-%m-%Y_%I-%M-%S.bin",timeinfo);
 //    LOGE("Date is %s ?", char_buffer);
 //
 //    for (int i=0; i<length_file_name_; ++i) {
@@ -36,9 +36,10 @@ void SynchronizationApplication::getCurrentTimeAsString(char * char_timestr_) {
 //    }
 }
 
-void SynchronizationApplication::writeCameraIntrinsics2Text(const TangoCameraIntrinsics tango_camera_intrinsics_) {
+void SynchronizationApplication::writeCameraIntrinsics2Text(const TangoCameraIntrinsics tango_camera_intrinsics_, std::string camera_type) {
+    std::string intr_file_name_ = "/sdcard/Download/Tango_" + camera_type + "_Camera_Intrinsics.txt";
 
-    std::ofstream intrinsicsFile ("/sdcard/Download/Tango_Camera_Intrinsics.txt");
+    std::ofstream intrinsicsFile (intr_file_name_.c_str());
     if (intrinsicsFile.is_open()) {
         intrinsicsFile << "calibration_type:\n";
         switch(tango_camera_intrinsics_.calibration_type) {
@@ -89,6 +90,12 @@ void OnFrameAvailableRouter(void* context, TangoCameraId id, const TangoImageBuf
     app->OnFrameAvailable(buffer);
 }
 
+void OnFisheyeFrameAvailableRouter(void* context, TangoCameraId id, const TangoImageBuffer* buffer) {
+    SynchronizationApplication* app =
+            static_cast<SynchronizationApplication*>(context);
+    app->OnFisheyeFrameAvailable(buffer);
+}
+
 void SynchronizationApplication::OnXYZijAvailable(const TangoXYZij* xyz_ij) {
   // We'll just update the point cloud associated with our depth image.
   TangoSupport_updatePointCloud(point_cloud_manager_, xyz_ij);
@@ -97,6 +104,11 @@ void SynchronizationApplication::OnXYZijAvailable(const TangoXYZij* xyz_ij) {
 void SynchronizationApplication::OnFrameAvailable(const TangoImageBuffer* buffer) {
     // We'll just update the color image.... fuckers
     TangoSupport_updateImageBuffer(color_image_manager_, buffer);
+}
+
+void SynchronizationApplication::OnFisheyeFrameAvailable(const TangoImageBuffer* buffer) {
+    // We'll just update the fisheye image.... eat shit
+    TangoSupport_updateImageBuffer(fisheye_image_manager_, buffer);
 }
 
 SynchronizationApplication::SynchronizationApplication()
@@ -243,7 +255,9 @@ bool SynchronizationApplication::TangoConnectCallbacks() {
       TangoService_connectOnXYZijAvailable(OnXYZijAvailableRouter);
   TangoErrorType color_ret =
       TangoService_connectOnFrameAvailable(TANGO_CAMERA_COLOR, this, OnFrameAvailableRouter);
-  return (depth_ret == TANGO_SUCCESS) && (color_ret == TANGO_SUCCESS);
+    TangoErrorType fisheye_ret =
+            TangoService_connectOnFrameAvailable(TANGO_CAMERA_FISHEYE, this, OnFisheyeFrameAvailableRouter);
+  return (depth_ret == TANGO_SUCCESS) && (color_ret == TANGO_SUCCESS) && (fisheye_ret == TANGO_SUCCESS);
 }
 
 bool SynchronizationApplication::TangoConnect() {
@@ -271,7 +285,18 @@ bool SynchronizationApplication::TangoSetIntrinsicsAndExtrinsics() {
     return false;
   }
 
-  writeCameraIntrinsics2Text(color_camera_intrinsics);
+  TangoCameraIntrinsics fisheye_camera_intrinsics;
+  TangoErrorType err_f = TangoService_getCameraIntrinsics(
+      TANGO_CAMERA_FISHEYE, &fisheye_camera_intrinsics);
+  if (err_f != TANGO_SUCCESS) {
+    LOGE(
+        "SynchronizationApplication: Failed to get the intrinsics for the fisheye"
+        "camera.");
+    return false;
+  }
+  writeCameraIntrinsics2Text(fisheye_camera_intrinsics, "Fisheye");
+
+  writeCameraIntrinsics2Text(color_camera_intrinsics, "Color");
   image_width_ = color_camera_intrinsics.width;
   image_height_ =  color_camera_intrinsics.height;
   depth_image_.SetCameraIntrinsics(color_camera_intrinsics);
