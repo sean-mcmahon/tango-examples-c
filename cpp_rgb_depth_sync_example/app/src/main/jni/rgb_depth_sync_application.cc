@@ -536,7 +536,7 @@ void SynchronizationApplication::Render() {
             if (save_fisheye_images) {
                 myfile.write(reinterpret_cast<const char *>(&fisheye_image_buffer_->data[0]),
                          std::streamsize(fisheye_image_width_ * (fisheye_image_height_ + fisheye_image_height_ /
-                                                                         2))); // YUV 420 SP format, sizes are height*1.5, width
+                                                                                         2))); // Cause YUV 420 NV21
                 myfile.write(reinterpret_cast<const char *>(&fisheye_image_buffer_->timestamp),
                              sizeof(double));
             }
@@ -556,6 +556,9 @@ void SynchronizationApplication::Render() {
 //                LOGI("ColorImageBuffer. height: %d, width: %d, depth: %d,buffer timestamp %f, and Format: %04x (0x11 = YCbCr_420_SP)",
 //                     color_image_buffer_->width, color_image_buffer_->height, image_depth_,
 //                     color_image_buffer_->timestamp, color_image_buffer_->format);
+                LOGI("FisheyeImageBuffer. height: %d, width: %d,buffer timestamp %f, and Format: %04x (0x11 = YCbCr_420_SP)",
+                     fisheye_image_buffer_->height, fisheye_image_buffer_->width,
+                     fisheye_image_buffer_->timestamp, fisheye_image_buffer_->format);
 //                LOGI("First few values of color_image_buffer_->data are: %u, %u, %u, %u, %u ",
 //                     color_image_buffer_->data[0], color_image_buffer_->data[220395],
 //                     color_image_buffer_->data[220405], color_image_buffer_->data[220400],
